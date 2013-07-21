@@ -12,3 +12,14 @@ logs
 results
 
 npm-debug.log
+
+*.js
+
+# exceptions
+!Gruntfile.js
+!src/typescript-adapter.js
+!src/typescript/typescript.js.js
+!bin/*.js
+!bin/*/*.js
+!bin/*/*/*.js
+!bin/*/*/*/*.js
