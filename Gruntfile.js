@@ -16,7 +16,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         clean: {
-            bin: ['bin/api.js', 'bin/cli.js', 'bin/javascript.js']
+            bin: ['bin/api.js', 'bin/cli.js', 'bin/javascript.js', 'bin/rules']
         },
         typescript: {
             options: {
@@ -33,6 +33,10 @@ module.exports = function (grunt) {
             cli: {
                 src: ['src/cli.ts'],
                 dest: 'bin/cli.js'
+            },
+            rules: {
+                src: ['src/rules/*/*.ts'],
+                dest: 'bin'
             }
         },
         replace: {
@@ -49,8 +53,9 @@ module.exports = function (grunt) {
 
     grunt.registerTask('compile-api', ['typescript:api']);
     grunt.registerTask('compile-cli', ['typescript:cli']);
+    grunt.registerTask('compile-rules', ['typescript:rules']);
     grunt.registerTask('replace-ts', ['replace:tssource']);
-    grunt.registerTask('build', ['clean:bin', 'compile-api', 'compile-cli', 'replace-ts']);
+    grunt.registerTask('build', ['clean:bin', 'compile-api', 'compile-cli', 'compile-rules', 'replace-ts']);
 
     grunt.registerTask('default', ['build']);
 };

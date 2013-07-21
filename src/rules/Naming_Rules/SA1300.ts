@@ -3,7 +3,7 @@
 
 declare var require: any;
 
-var TS = <TypeScript>require('../typescript').TypeScript;
+var TS = <TypeScript>require('../../typescript').TypeScript;
 
 export var rule = <RuleConfig>{
     name: 'ElementMustBeginWithUpperCaseLetter',

@@ -212,7 +212,7 @@ var IO = (function () {
 
     return getNodeIO();
 })();
-var TS = require('../src/typescript/typescript').TypeScript;
+var TS = require('./typescript').TypeScript;
 
 var ErrorReporter = (function () {
     function ErrorReporter() {

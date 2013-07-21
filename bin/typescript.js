@@ -20523,6 +20523,13 @@ var TypeScript;
         }
 
         // -------------------------------------
+/**********************************************************
+    NOTE:
+        This code will be inserted in the src/typescript/typescript.js 
+        file in place of text "//###-TS - StyleCop Block=###".
+**********************************************************/
+
+// store configured rules
 PositionTrackingWalker.rulesByNodeType = [];
 
 PositionTrackingWalker.registerRule = function (extension) {
@@ -20544,6 +20551,7 @@ PositionTrackingWalker.registerRule = function (extension) {
     });
 };
 
+// verify rule match
 PositionTrackingWalker.prototype.matches = function (node, matcher) {
     if (matcher.nodeType.indexOf(node.kind()) == -1)
         return false;
@@ -20581,6 +20589,7 @@ PositionTrackingWalker.prototype.ruleHandled = function (node) {
     }
 };
 
+// entry point
 PositionTrackingWalker.prototype.visitNode = function (node) {
     this.ruleHandled(node);
     node.accept(this);

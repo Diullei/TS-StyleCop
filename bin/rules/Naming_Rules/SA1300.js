@@ -1,4 +1,4 @@
-var TS = require('../../../src/typescript/typescript').TypeScript;
+var TS = require('../../typescript').TypeScript;
 
 exports.rule = {
     name: 'ElementMustBeginWithUpperCaseLetter',
