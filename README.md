@@ -11,11 +11,11 @@ TS-StyleCop provides value by enforcing a common set of style rules for TypeScri
 
 ## Install
 
-npm install -g tscop
+    npm install -g tscop
 
 ## Usage
 
-tscop hello.ts
+    tscop hello.ts
 
 ## Build
 
@@ -73,4 +73,4 @@ export var rule = <RuleConfig>{
 
 Let's create a rule file named `myCustomRule.ts` with this template.
 
-  ...
+...
