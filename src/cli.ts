@@ -2,10 +2,12 @@
 ///<reference path='compiler.d.ts' />
 /// <reference path="optionsParser.ts" />
 
+var TS = <TypeScript>require('./typescript').TypeScript;
+
 class Batch {
     private api = <{ verify: (code: string) => IViolation[]; registerRule: (rule: RuleConfig) => any; }>require('./api');
 
-    constructor(public ioHost: IIO) {
+    constructor(private ioHost: IIO) {
     }
 
     private printVersion() {
@@ -14,12 +16,42 @@ class Batch {
         this.ioHost.printLine("Version " + version);
     }
 
+    private getLine(source: string, position: number): { index: number; text: string; line: number; } {
+        var index = position;
+        if (position > 0) {
+            while (index > 0 && source[index] != '\n') {
+                index--;
+            }
+
+            return { index: position - index, text: source.substr(index).match(/[^\r\n]+/g)[0], line: source.substr(0, index).match(/[^\r\n]+/g).length + 1 };
+        } else {
+            return { index: position - index, text: source.match(/[^\r\n]+/g)[0], line: 1 };
+        }
+    }
+
+    private pad(value, count) {
+        var result = '';
+        for (var i = 0; i < count; i++) {
+            result += value;
+        }
+        return result;
+    }
+
     private printViolations(file: string, violations: IViolation[]) {
         this.ioHost.printLine('');
         this.ioHost.printLine(' ==== \33[36m\33[1m' + file + '\33[0m ====');
 
         var printTSStyleCopViolation = (violation: IViolation, index: number) => {
             this.ioHost.printLine(' #' + index + ' \33[36m\33[1m\[\33[31m\33[1m' + violation.code + '\33[36m\33[1m\]\33[0m ' + violation.message);
+
+            //console.log(violation.node);
+
+            var node = <any>violation.node;
+            // TODO: create an interface no node
+            var line = this.getLine(node._sourceText.scriptSnapshot.text, node._fullStart);
+
+            this.ioHost.printLine('   \33[33m\33[1m' + line.text + '\33[0m // Line ' + line.line + ', Pos ' + line.index);
+            this.ioHost.printLine('  ' + this.pad(' ', line.index) + '\33[31m\33[1m' + this.pad('^', node.valueText().length) + '\33[0m');
         };
 
         var printTypeScriptViolation = (violation: IViolation, index: number) => {

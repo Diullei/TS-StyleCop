@@ -30,6 +30,7 @@ interface IViolation {
     type: ViolationType;
     code?: string;
     message: string;
+    node: TypeScript.ISyntaxToken;//SyntaxNode;
 }
 
 class ErrorReporter implements TypeScript.IDignosticsReporter {

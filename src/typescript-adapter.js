@@ -27,7 +27,7 @@ PositionTrackingWalker.registerRule = function (extension) {
 };
 
 // verify rule match
-PositionTrackingWalker.prototype.matches = function (node, matcher) {
+PositionTrackingWalker.prototype.matches = function (node, matcher, refNode) {
     if (matcher.nodeType.indexOf(node.kind()) == -1)
         return false;
     if (typeof matcher.propertyMatches !== 'undefined') {
@@ -35,6 +35,7 @@ PositionTrackingWalker.prototype.matches = function (node, matcher) {
             if (!(prop in node))
                 return false;
             var astProp = node[prop];
+            refNode.target = astProp;
             var matcherProp = matcher.propertyMatches[prop];
             if (typeof matcherProp === 'function') {
                 if (!matcherProp(astProp))
@@ -50,14 +51,16 @@ PositionTrackingWalker.prototype.ruleHandled = function (node) {
     var rule = PositionTrackingWalker.rulesByNodeType[node.kind()];
     if (typeof rule !== 'undefined') {
         rule.some(function (rl) {
-            if (!_this.matches(node, rl.matcher)) {
+            var refNode = {};
+            if (!_this.matches(node, rl.matcher, refNode)) {
                 if (!PositionTrackingWalker.violations)
                     PositionTrackingWalker.violations = [];
 
                 PositionTrackingWalker.violations.push({
                     code: rl.code,
                     type: /*ViolationType.TSStyleCop*/1,
-                    message: rl.definition
+                    message: rl.definition,
+                    node: refNode.target
                 });
             }
         });

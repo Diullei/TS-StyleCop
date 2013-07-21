@@ -27,6 +27,7 @@ interface IViolation {
     type: ViolationType;
     code?: string;
     message: string;
+    node: TypeScript.ISyntaxToken;//SyntaxNode;
 }
 
 declare class TypeScriptCompiler {
