@@ -17,11 +17,8 @@ export var rule = <RuleConfig>{
     + 'classes, enums, interfaces.',
     howToFix:
     'To fix a violation of this rule, change the name of the element so that it begins with an upper-case letter',
-    howToSuppress:
-    '//SuppressMessage: "TS-StyleCop.TypeScript.NamingRules", "SA1300:ElementMustBeginWithUpperCaseLetter", Justification = "Reviewed."',
     matcher: {
         nodeType: [TS.SyntaxKind.ClassDeclaration],
-        priority: 1,
         propertyMatches: {
             identifier: (node): bool => {
                 return !(/[a-z]/.test(node.text()[0]))
@@ -29,3 +26,4 @@ export var rule = <RuleConfig>{
         }
     }
 };
+//'//SuppressMessage: "TS-StyleCop.TypeScript.NamingRules", "SA1300:ElementMustBeginWithUpperCaseLetter", Justification = "Reviewed."',

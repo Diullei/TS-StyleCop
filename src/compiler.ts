@@ -5,7 +5,6 @@ var TS = <TypeScript>require('./typescript').TypeScript;
 
 interface Matcher {
     nodeType: TypeScript.SyntaxKind[];
-    priority: number;
     propertyMatches?: {};
 }
 
@@ -17,7 +16,7 @@ interface RuleConfig {
     definition: string;
     description: string;
     howToFix: string;
-    howToSuppress: string;
+    howToSuppress?: string;
     matcher: Matcher;
 }
 
