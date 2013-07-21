@@ -23,3 +23,5 @@ npm-debug.log
 !bin/*/*.js
 !bin/*/*/*.js
 !bin/*/*/*/*.js
+
+test.ts

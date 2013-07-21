@@ -15,6 +15,160 @@
 
 declare var require: any;
 
+enum ByteOrderMark {
+    None,
+    Utf8,
+    Utf16BigEndian,
+    Utf16LittleEndian,
+}
+
+class FileInformation {
+    private _contents: string;
+    private _byteOrderMark: ByteOrderMark;
+
+    constructor(contents: string, byteOrderMark: ByteOrderMark) {
+        this._contents = contents;
+        this._byteOrderMark = byteOrderMark;
+    }
+
+    public contents(): string {
+        return this._contents;
+    }
+
+    public byteOrderMark(): ByteOrderMark {
+        return this._byteOrderMark;
+    }
+}
+
+interface IEnvironment {
+    readFile(path: string): FileInformation;
+    writeFile(path: string, contents: string, writeByteOrderMark: boolean): void;
+    deleteFile(path: string): void;
+    fileExists(path: string): boolean;
+    directoryExists(path: string): boolean;
+    listFiles(path: string, re?: RegExp, options?: { recursive?: boolean; }): string[];
+
+    arguments: string[];
+    standardOut: ITextWriter;
+
+    currentDirectory(): string;
+}
+
+var Environment = (function () {
+    function getNodeEnvironment(): IEnvironment {
+        var _fs = require('fs');
+        var _path = require('path');
+        var _module = require('module');
+
+        return {
+            currentDirectory: (): string => {
+                return (<any>process).cwd();
+            },
+
+            readFile: function (file: string): FileInformation {
+                var buffer = _fs.readFileSync(file);
+                switch (buffer[0]) {
+                    case 0xFE:
+                        if (buffer[1] === 0xFF) {
+                            // utf16-be. Reading the buffer as big endian is not supported, so convert it to 
+                            // Little Endian first
+                            var i = 0;
+                            while ((i + 1) < buffer.length) {
+                                var temp = buffer[i];
+                                buffer[i] = buffer[i + 1];
+                                buffer[i + 1] = temp;
+                                i += 2;
+                            }
+                            return new FileInformation(buffer.toString("ucs2", 2), ByteOrderMark.Utf16BigEndian);
+                        }
+                        break;
+                    case 0xFF:
+                        if (buffer[1] === 0xFE) {
+                            // utf16-le 
+                            return new FileInformation(buffer.toString("ucs2", 2), ByteOrderMark.Utf16LittleEndian);
+                        }
+                        break;
+                    case 0xEF:
+                        if (buffer[1] === 0xBB) {
+                            // utf-8
+                            return new FileInformation(buffer.toString("utf8", 3), ByteOrderMark.Utf8);
+                        }
+                }
+
+                // Default behaviour
+                return new FileInformation(buffer.toString("utf8", 0), ByteOrderMark.None);
+            },
+
+            writeFile: function (path: string, contents: string, writeByteOrderMark: boolean) {
+                function mkdirRecursiveSync(path) {
+                    var stats = _fs.statSync(path);
+                    if (stats.isFile()) {
+                        throw "\"" + path + "\" exists but isn't a directory.";
+                    } else if (stats.isDirectory()) {
+                        return;
+                    } else {
+                        mkdirRecursiveSync(_path.dirname(path));
+                        _fs.mkdirSync(path, 0775);
+                    }
+                }
+                mkdirRecursiveSync(_path.dirname(path));
+
+                if (writeByteOrderMark) {
+                    contents = '\uFEFF' + contents;
+                }
+                _fs.writeFileSync(path, contents, "utf8");
+            },
+
+            fileExists: function (path): boolean {
+                return _fs.existsSync(path);
+            },
+
+            deleteFile: function (path) {
+                try {
+                    _fs.unlinkSync(path);
+                } catch (e) {
+                }
+            },
+
+            directoryExists: function (path: string): boolean {
+                return _fs.existsSync(path) && _fs.statSync(path).isDirectory();
+            },
+
+            listFiles: function dir(path, spec?, options?) {
+                options = options || <{ recursive?: boolean; }>{};
+
+                function filesInFolder(folder: string): string[] {
+                    var paths = [];
+
+                    var files = _fs.readdirSync(folder);
+                    for (var i = 0; i < files.length; i++) {
+                        var stat = _fs.statSync(folder + "\\" + files[i]);
+                        if (options.recursive && stat.isDirectory()) {
+                            paths = paths.concat(filesInFolder(folder + "\\" + files[i]));
+                        } else if (stat.isFile() && (!spec || files[i].match(spec))) {
+                            paths.push(folder + "\\" + files[i]);
+                        }
+                    }
+
+                    return paths;
+                }
+
+                return filesInFolder(path);
+            },
+
+            arguments: process.argv.slice(2),
+
+            standardOut: {
+                Write: function (str) { process.stdout.write(str); },
+                WriteLine: function (str) { process.stdout.write(str + '\n'); },
+                Close: function () { }
+            },
+        };
+    };
+
+    return getNodeEnvironment();
+})();
+
 interface IResolvedFile {
     fileInformation: FileInformation;
     path: string;
@@ -40,7 +194,7 @@ interface IIO {
     arguments: string[];
     stderr: ITextWriter;
     stdout: ITextWriter;
-    watchFile(fileName: string, callback: (x:string) => void ): IFileWatcher;
+    watchFile(fileName: string, callback: (x: string) => void ): IFileWatcher;
     run(source: string, fileName: string): void;
     getExecutingFilePath(): string;
     quit(exitCode?: number);
@@ -99,9 +253,9 @@ module IOUtils {
 }
 
 // Declare dependencies needed for all supported hosts
-declare function setTimeout(callback: () =>void , ms?: number);
+declare function setTimeout(callback: () => void , ms?: number);
 
-var IO = (function() {
+var IO = (function () {
     // Create an IO object for use inside Node.js hosts
     // Depends on 'fs' and 'path' modules
     function getNodeIO(): IIO {
@@ -119,21 +273,21 @@ var IO = (function() {
                 Environment.writeFile(path, contents, writeByteOrderMark);
             },
 
-            deleteFile: function(path) {
+            deleteFile: function (path) {
                 try {
                     _fs.unlinkSync(path);
                 } catch (e) {
                     IOUtils.throwIOError("Couldn't delete file '" + path + "'.", e);
                 }
             },
-            fileExists: function(path): boolean {
+            fileExists: function (path): boolean {
                 return _fs.existsSync(path);
             },
 
             dir: function dir(path, spec?, options?) {
                 options = options || <{ recursive?: boolean; }>{};
 
-                function filesInFolder(folder: string): string[]{
+                function filesInFolder(folder: string): string[] {
                     var paths = [];
 
                     try {
@@ -157,7 +311,7 @@ var IO = (function() {
 
                 return filesInFolder(path);
             },
-            createDirectory: function(path: string): void {
+            createDirectory: function (path: string): void {
                 try {
                     if (!this.directoryExists(path)) {
                         _fs.mkdirSync(path);
@@ -167,16 +321,16 @@ var IO = (function() {
                 }
             },
 
-            directoryExists: function(path: string): boolean {
+            directoryExists: function (path: string): boolean {
                 return _fs.existsSync(path) && _fs.statSync(path).isDirectory();
             },
-            resolvePath: function(path: string): string {
+            resolvePath: function (path: string): string {
                 return _path.resolve(path);
             },
-            dirName: function(path: string): string {
+            dirName: function (path: string): string {
                 return _path.dirname(path);
             },
-            findFile: function(rootPath: string, partialFilePath): IResolvedFile {
+            findFile: function (rootPath: string, partialFilePath): IResolvedFile {
                 var path = rootPath + "/" + partialFilePath;
 
                 while (true) {
@@ -198,23 +352,23 @@ var IO = (function() {
                 }
             },
             print: function (str) { process.stdout.write(str); },
-            printLine: function(str) { process.stdout.write(str + '\n') },
+            printLine: function (str) { process.stdout.write(str + '\n') },
             arguments: process.argv.slice(2),
             stderr: {
-                Write: function(str) { process.stderr.write(str); },
-                WriteLine: function(str) { process.stderr.write(str + '\n'); },
-                Close: function() { }
+                Write: function (str) { process.stderr.write(str); },
+                WriteLine: function (str) { process.stderr.write(str + '\n'); },
+                Close: function () { }
             },
             stdout: {
-                Write: function(str) { process.stdout.write(str); },
-                WriteLine: function(str) { process.stdout.write(str + '\n'); },
-                Close: function() { }
+                Write: function (str) { process.stdout.write(str); },
+                WriteLine: function (str) { process.stdout.write(str + '\n'); },
+                Close: function () { }
             },
-            watchFile: function(fileName: string, callback: (x:string) => void ): IFileWatcher {
+            watchFile: function (fileName: string, callback: (x: string) => void ): IFileWatcher {
                 var firstRun = true;
                 var processingChange = false;
 
-                var fileChanged: any = function(curr, prev) {
+                var fileChanged: any = function (curr, prev) {
                     if (!firstRun) {
                         if (curr.mtime < prev.mtime) {
                             return;
@@ -224,7 +378,7 @@ var IO = (function() {
                         if (!processingChange) {
                             processingChange = true;
                             callback(fileName);
-                            setTimeout(function() { processingChange = false; }, 100);
+                            setTimeout(function () { processingChange = false; }, 100);
                         }
                     }
                     firstRun = false;
@@ -234,16 +388,16 @@ var IO = (function() {
                 fileChanged();
                 return {
                     fileName: fileName,
-                    close: function() {
+                    close: function () {
                         _fs.unwatchFile(fileName, fileChanged);
                     }
                 };
             },
-            run: function(source, fileName) {
+            run: function (source, fileName) {
                 require.main.fileName = fileName;
                 require.main.paths = _module._nodeModulePaths(_path.dirname(_fs.realpathSync(fileName)));
                 require.main._compile(source, fileName);
-            }, 
+            },
             getExecutingFilePath: function () {
                 return (<any>process).mainModule.filename;
             },

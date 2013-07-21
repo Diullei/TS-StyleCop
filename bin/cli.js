@@ -1,3 +1,134 @@
+var ByteOrderMark;
+(function (ByteOrderMark) {
+    ByteOrderMark[ByteOrderMark["None"] = 0] = "None";
+    ByteOrderMark[ByteOrderMark["Utf8"] = 1] = "Utf8";
+    ByteOrderMark[ByteOrderMark["Utf16BigEndian"] = 2] = "Utf16BigEndian";
+    ByteOrderMark[ByteOrderMark["Utf16LittleEndian"] = 3] = "Utf16LittleEndian";
+})(ByteOrderMark || (ByteOrderMark = {}));
+
+var FileInformation = (function () {
+    function FileInformation(contents, byteOrderMark) {
+        this._contents = contents;
+        this._byteOrderMark = byteOrderMark;
+    }
+    FileInformation.prototype.contents = function () {
+        return this._contents;
+    };
+
+    FileInformation.prototype.byteOrderMark = function () {
+        return this._byteOrderMark;
+    };
+    return FileInformation;
+})();
+
+var Environment = (function () {
+    function getNodeEnvironment() {
+        var _fs = require('fs');
+        var _path = require('path');
+        var _module = require('module');
+
+        return {
+            currentDirectory: function () {
+                return (process).cwd();
+            },
+            readFile: function (file) {
+                var buffer = _fs.readFileSync(file);
+                switch (buffer[0]) {
+                    case 0xFE:
+                        if (buffer[1] === 0xFF) {
+                            var i = 0;
+                            while ((i + 1) < buffer.length) {
+                                var temp = buffer[i];
+                                buffer[i] = buffer[i + 1];
+                                buffer[i + 1] = temp;
+                                i += 2;
+                            }
+                            return new FileInformation(buffer.toString("ucs2", 2), ByteOrderMark.Utf16BigEndian);
+                        }
+                        break;
+                    case 0xFF:
+                        if (buffer[1] === 0xFE) {
+                            return new FileInformation(buffer.toString("ucs2", 2), ByteOrderMark.Utf16LittleEndian);
+                        }
+                        break;
+                    case 0xEF:
+                        if (buffer[1] === 0xBB) {
+                            return new FileInformation(buffer.toString("utf8", 3), ByteOrderMark.Utf8);
+                        }
+                }
+
+                return new FileInformation(buffer.toString("utf8", 0), ByteOrderMark.None);
+            },
+            writeFile: function (path, contents, writeByteOrderMark) {
+                function mkdirRecursiveSync(path) {
+                    var stats = _fs.statSync(path);
+                    if (stats.isFile()) {
+                        throw "\"" + path + "\" exists but isn't a directory.";
+                    } else if (stats.isDirectory()) {
+                        return;
+                    } else {
+                        mkdirRecursiveSync(_path.dirname(path));
+                        _fs.mkdirSync(path, 0775);
+                    }
+                }
+                mkdirRecursiveSync(_path.dirname(path));
+
+                if (writeByteOrderMark) {
+                    contents = '\uFEFF' + contents;
+                }
+                _fs.writeFileSync(path, contents, "utf8");
+            },
+            fileExists: function (path) {
+                return _fs.existsSync(path);
+            },
+            deleteFile: function (path) {
+                try  {
+                    _fs.unlinkSync(path);
+                } catch (e) {
+                }
+            },
+            directoryExists: function (path) {
+                return _fs.existsSync(path) && _fs.statSync(path).isDirectory();
+            },
+            listFiles: function dir(path, spec, options) {
+                options = options || {};
+
+                function filesInFolder(folder) {
+                    var paths = [];
+
+                    var files = _fs.readdirSync(folder);
+                    for (var i = 0; i < files.length; i++) {
+                        var stat = _fs.statSync(folder + "\\" + files[i]);
+                        if (options.recursive && stat.isDirectory()) {
+                            paths = paths.concat(filesInFolder(folder + "\\" + files[i]));
+                        } else if (stat.isFile() && (!spec || files[i].match(spec))) {
+                            paths.push(folder + "\\" + files[i]);
+                        }
+                    }
+
+                    return paths;
+                }
+
+                return filesInFolder(path);
+            },
+            arguments: process.argv.slice(2),
+            standardOut: {
+                Write: function (str) {
+                    process.stdout.write(str);
+                },
+                WriteLine: function (str) {
+                    process.stdout.write(str + '\n');
+                },
+                Close: function () {
+                }
+            }
+        };
+    }
+    ;
+
+    return getNodeEnvironment();
+})();
+
 var IOUtils;
 (function (IOUtils) {
     function createDirectoryStructure(ioHost, dirName) {
@@ -231,9 +362,9 @@ var OptionsParser = (function () {
     };
 
     OptionsParser.prototype.printUsage = function () {
-        this.host.printLine("Syntax:   tsmvc [options]");
+        this.host.printLine(" Syntax:   tscop [options] [file ..]");
         this.host.printLine("");
-        this.host.printLine("Options:");
+        this.host.printLine(" Options:");
 
         var output = [];
         var maxLength = 0;
@@ -405,8 +536,72 @@ var OptionsParser = (function () {
     };
     return OptionsParser;
 })();
-var api = require('./api');
+var Batch = (function () {
+    function Batch(ioHost) {
+        this.ioHost = ioHost;
+        this.api = require('./api');
+    }
+    Batch.prototype.printVersion = function () {
+        var packageConfig = require('../package');
+        var version = packageConfig.version;
+        this.ioHost.printLine("Version " + version);
+    };
 
-var code = 'class teste {}';
+    Batch.prototype.printViolations = function (file, violations) {
+        var _this = this;
+        this.ioHost.printLine('');
+        this.ioHost.printLine(' ==== \33[36m\33[1m' + file + '\33[0m ====');
 
-api.verify(code);
+        var printTSStyleCopViolation = function (violation, index) {
+            _this.ioHost.printLine(' #' + index + ' \33[36m\33[1m\[\33[31m\33[1m' + violation.code + '\33[36m\33[1m\]\33[0m ' + violation.message);
+        };
+
+        violations.forEach(function (violation, index) {
+            if (violation.type == 1) {
+                printTSStyleCopViolation(violation, index + 1);
+            }
+        });
+    };
+
+    Batch.prototype.run = function () {
+        var _this = this;
+        var opts = new OptionsParser(IO);
+
+        var printedUsage = false;
+
+        opts.flag('help', {
+            usage: 'Print this message',
+            set: function () {
+                _this.printVersion();
+                opts.printUsage();
+                printedUsage = true;
+            }
+        }, 'h');
+
+        opts.flag('version', {
+            usage: 'Print the TS-StypeCop version',
+            set: function () {
+                _this.printVersion();
+            }
+        }, 'v');
+
+        opts.parse(IO.arguments);
+
+        if (opts.unnamed.length > 0) {
+            for (var i = 0; i < opts.unnamed.length; i++) {
+                var code = this.ioHost.readFile(opts.unnamed[i]).contents();
+                var violations = this.api.verify(code);
+                this.printViolations(opts.unnamed[i], violations);
+            }
+        } else {
+            if (!printedUsage) {
+                this.ioHost.printLine(' No files specified. To verify usage run: tscop --help');
+                this.ioHost.quit(1);
+            }
+        }
+    };
+    return Batch;
+})();
+
+var batch = new Batch(IO);
+batch.run();

@@ -50,9 +50,9 @@ class OptionsParser {
     }
 
     public printUsage() {
-        this.host.printLine("Syntax:   tsmvc [options]");
+        this.host.printLine(" Syntax:   tscop [options] [file ..]");
         this.host.printLine("");
-        this.host.printLine("Options:");
+        this.host.printLine(" Options:");
 
         var output = [];
         var maxLength = 0;

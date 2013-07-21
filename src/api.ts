@@ -19,6 +19,5 @@ exports.registerRule = registerRule;
 
 exports.verify = (code: string) => {
     var compiler = new TypeScriptCompiler(rules);
-    var violations = compiler.validate(code);
-    console.log(violations);
+    return compiler.validate(code);
 }

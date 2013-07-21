@@ -705,33 +705,33 @@ declare module process {
     }
     function exit(exitCode?: number);
 }
-declare enum ByteOrderMark {
-    None,
-    Utf8,
-    Utf16BigEndian,
-    Utf16LittleEndian,
-}
-declare class FileInformation {
-    private _contents;
-    private _byteOrderMark;
-    constructor(contents: string, byteOrderMark: ByteOrderMark);
-    public contents(): string;
-    public byteOrderMark(): ByteOrderMark;
-}
-interface IEnvironment {
-    readFile(path: string): FileInformation;
-    writeFile(path: string, contents: string, writeByteOrderMark: boolean): void;
-    deleteFile(path: string): void;
-    fileExists(path: string): boolean;
-    directoryExists(path: string): boolean;
-    listFiles(path: string, re?: RegExp, options?: {
-        recursive?: boolean;
-    }): string[];
-    arguments: string[];
-    standardOut: ITextWriter;
-    currentDirectory(): string;
-}
-declare var Environment: IEnvironment;
+//declare enum ByteOrderMark {
+//    None,
+//    Utf8,
+//    Utf16BigEndian,
+//    Utf16LittleEndian,
+//}
+//declare class FileInformation {
+//    private _contents;
+//    private _byteOrderMark;
+//    constructor(contents: string, byteOrderMark: ByteOrderMark);
+//    public contents(): string;
+//    public byteOrderMark(): ByteOrderMark;
+//}
+//interface IEnvironment {
+//    readFile(path: string): FileInformation;
+//    writeFile(path: string, contents: string, writeByteOrderMark: boolean): void;
+//    deleteFile(path: string): void;
+//    fileExists(path: string): boolean;
+//    directoryExists(path: string): boolean;
+//    listFiles(path: string, re?: RegExp, options?: {
+//        recursive?: boolean;
+//    }): string[];
+//    arguments: string[];
+//    standardOut: ITextWriter;
+//    currentDirectory(): string;
+//}
+//declare var Environment: IEnvironment;
 declare module TypeScript {
     class IntegerUtilities {
         static integerDivide(numerator: number, denominator: number): number;
@@ -5915,15 +5915,15 @@ declare module TypeScript {
 }
 declare module TypeScript {
     interface IResolvedFile {
-        fileInformation: FileInformation;
+        fileInformation: any;//FileInformation;
         path: string;
     }
     class SourceUnit implements TypeScript.IScriptSnapshot, IResolvedFile {
         public path: string;
-        public fileInformation: FileInformation;
+        public fileInformation: any;//FileInformation;
         public referencedFiles: IFileReference[];
         private lineStarts;
-        constructor(path: string, fileInformation: FileInformation);
+        constructor(path: string, fileInformation: /*FileInformation*/any);
         public getText(start: number, end: number): string;
         public getLength(): number;
         public getLineStartPositions(): number[];
@@ -5937,7 +5937,7 @@ declare module TypeScript {
     }
     interface IFileSystemObject {
         resolvePath(path: string): string;
-        readFile(path: string): FileInformation;
+        readFile(path: string): any;//FileInformation;
         findFile(rootPath: string, partialFilePath: string): IResolvedFile;
         dirName(path: string): string;
     }
@@ -7627,7 +7627,7 @@ declare module TypeScript {
         public fileName: string;
         private compilationSettings;
         private scriptSnapshot;
-        public byteOrderMark: ByteOrderMark;
+        public byteOrderMark: any;//ByteOrderMark;
         public version: number;
         public isOpen: boolean;
         private _diagnostics;
@@ -7635,12 +7635,12 @@ declare module TypeScript {
         private _bloomFilter;
         public script: TypeScript.Script;
         public lineMap: TypeScript.LineMap;
-        constructor(fileName: string, compilationSettings: TypeScript.CompilationSettings, scriptSnapshot: TypeScript.IScriptSnapshot, byteOrderMark: ByteOrderMark, version: number, isOpen: boolean, syntaxTree: TypeScript.SyntaxTree);
+        constructor(fileName: string, compilationSettings: TypeScript.CompilationSettings, scriptSnapshot: TypeScript.IScriptSnapshot, byteOrderMark: any/*ByteOrderMark*/, version: number, isOpen: boolean, syntaxTree: TypeScript.SyntaxTree);
         public diagnostics(): TypeScript.IDiagnostic[];
         public syntaxTree(): TypeScript.SyntaxTree;
         public bloomFilter(): TypeScript.BloomFilter;
         public update(scriptSnapshot: TypeScript.IScriptSnapshot, version: number, isOpen: boolean, textChangeRange: TypeScript.TextChangeRange, settings: TypeScript.CompilationSettings): Document;
-        static create(fileName: string, scriptSnapshot: TypeScript.IScriptSnapshot, byteOrderMark: ByteOrderMark, version: number, isOpen: boolean, referencedFiles: TypeScript.IFileReference[], compilationSettings): Document;
+        static create(fileName: string, scriptSnapshot: TypeScript.IScriptSnapshot, byteOrderMark: any/*ByteOrderMark*/, version: number, isOpen: boolean, referencedFiles: TypeScript.IFileReference[], compilationSettings): Document;
     }
     var globalSemanticInfoChain: SemanticInfoChain;
     var globalBinder: PullSymbolBinder;
@@ -7656,7 +7656,7 @@ declare module TypeScript {
         constructor(logger?: TypeScript.ILogger, settings?: TypeScript.CompilationSettings, diagnosticMessages?: TypeScript.IDiagnosticMessages);
         public getDocument(fileName: string): Document;
         public timeFunction(funcDescription: string, func: () => any): any;
-        public addSourceUnit(fileName: string, scriptSnapshot: TypeScript.IScriptSnapshot, byteOrderMark: ByteOrderMark, version: number, isOpen: boolean, referencedFiles?: TypeScript.IFileReference[]): Document;
+        public addSourceUnit(fileName: string, scriptSnapshot: TypeScript.IScriptSnapshot, byteOrderMark: any/*ByteOrderMark*/, version: number, isOpen: boolean, referencedFiles?: TypeScript.IFileReference[]): Document;
         public updateSourceUnit(fileName: string, scriptSnapshot: TypeScript.IScriptSnapshot, version: number, isOpen: boolean, textChangeRange: TypeScript.TextChangeRange): Document;
         private isDynamicModuleCompilation();
         private updateCommonDirectoryPath();

@@ -3,20 +3,6 @@
 
 var TS = <TypeScript>require('./typescript').TypeScript;
 
-class ErrorReporter implements TypeScript.IDignosticsReporter {
-    private compilationEnvironment: TypeScript.CompilationEnvironment
-
-    public addDiagnostic(diagnostic: TypeScript.IDiagnostic) {
-        if (!(<any>TS.PositionTrackingWalker).violations)
-            (<any>TS.PositionTrackingWalker).violations = [];
-
-        (<any>TS.PositionTrackingWalker).violations.push({
-            type: ViolationType.TypeScript,
-            message: diagnostic.message()
-        });
-    }
-}
-
 interface Matcher {
     nodeType: TypeScript.SyntaxKind[];
     priority: number;
@@ -35,15 +21,29 @@ interface RuleConfig {
     matcher: Matcher;
 }
 
-enum ViolationType {
+declare enum ViolationType {
     TypeScript,
-    TSStyleCop
+    TSStyleCop,
 }
 
 interface IViolation {
     type: ViolationType;
     code?: string;
     message: string;
+}
+
+class ErrorReporter implements TypeScript.IDignosticsReporter {
+    private compilationEnvironment: TypeScript.CompilationEnvironment
+
+    public addDiagnostic(diagnostic: TypeScript.IDiagnostic) {
+        if (!(<any>TS.PositionTrackingWalker).violations)
+            (<any>TS.PositionTrackingWalker).violations = [];
+
+        (<any>TS.PositionTrackingWalker).violations.push({
+            type: ViolationType.TypeScript,
+            message: diagnostic.message()
+        });
+    }
 }
 
 class TypeScriptCompiler {

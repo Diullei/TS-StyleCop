@@ -1,8 +1,77 @@
 /// <reference path="compiler.d.ts" />
+///<reference path='compiler.d.ts' />
 /// <reference path="optionsParser.ts" />
 
-var api = <{ verify: (code: string) => any; registerRule: (rule: RuleConfig) => any; }>require('./api');
+class Batch {
+    private api = <{ verify: (code: string) => IViolation[]; registerRule: (rule: RuleConfig) => any; }>require('./api');
 
-var code = 'class teste {}';
+    constructor(public ioHost: IIO) {
+    }
 
-api.verify(code);
+    private printVersion() {
+        var packageConfig = require('../package');
+        var version = packageConfig.version;
+        this.ioHost.printLine("Version " + version);
+    }
+
+    private printViolations(file: string, violations: IViolation[]) {
+        this.ioHost.printLine('');
+        this.ioHost.printLine(' ==== \33[36m\33[1m' + file + '\33[0m ====');
+
+        var printTSStyleCopViolation = (violation: IViolation, index: number) => {
+            this.ioHost.printLine(' #' + index + ' \33[36m\33[1m\[\33[31m\33[1m' + violation.code + '\33[36m\33[1m\]\33[0m ' + violation.message);
+        };
+
+        var printTypeScriptViolation = (violation: IViolation, index: number) => {
+            this.ioHost.printLine('\33[31m\33[1m>\33[0m  #' + index + ' ' + violation.message);
+        };
+
+        violations.forEach((violation: IViolation, index: number) => {
+            if (violation.type == /*ViolationType.TSStyleCop*/1) {
+                printTSStyleCopViolation(violation, index + 1);
+            } else if (violation.type == /*ViolationType.TypeScript*/0) {
+                printTypeScriptViolation(violation, index + 1);
+            }
+        });
+    } 
+
+    public run() {
+        var opts = new OptionsParser(IO);
+
+        var printedUsage = false;
+
+        opts.flag('help', {
+            usage: 'Print this message',
+            set: () => {
+                this.printVersion();
+                opts.printUsage();
+                printedUsage = true;
+            }
+        }, 'h');
+
+        opts.flag('version', {
+            usage: 'Print the TS-StypeCop version',
+            set: () => {
+                this.printVersion();
+            }
+        }, 'v');
+
+        opts.parse(IO.arguments);
+
+        if (opts.unnamed.length > 0) {
+            for (var i = 0; i < opts.unnamed.length; i++) {
+                var code = this.ioHost.readFile(opts.unnamed[i]).contents();
+                var violations = this.api.verify(code);
+                this.printViolations(opts.unnamed[i], violations);
+            }
+        } else {
+            if (!printedUsage) {
+                this.ioHost.printLine(' No files specified. To verify usage run: tscop --help');
+                this.ioHost.quit(1);
+            }
+        }
+    }
+}
+
+var batch = new Batch(IO);
+batch.run();
