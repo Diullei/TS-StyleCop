@@ -4,10 +4,8 @@
 <a href="#ts-stylecop">TS-StyleCop</a>
 ===========
 
-**TS-StyleCop** is a tool to analyze *TypeScript* source code and enforce a set of style and consistency rules.
-> *Based on C# StyleCop.*
-
 TS-StyleCop provides value by enforcing a common set of style rules for TypeScript code. TS-StyleCop intend to be a single, consistent set of rules. Developers also will be able to implement their own rules.
+> *Based on C# StyleCop.*
 
 ### Install
 
