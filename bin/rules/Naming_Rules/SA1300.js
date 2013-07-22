@@ -9,7 +9,7 @@ exports.rule = {
     description: 'A violation of this rule occurs when the names of certain types of elements do not begin with an upper-case letter. ' + 'The following types of elements should use an upper-case letter as the first letter of the element name: namespaces, ' + 'classes, enums, interfaces.',
     howToFix: 'To fix a violation of this rule, change the name of the element so that it begins with an upper-case letter',
     matcher: {
-        nodeType: [TS.SyntaxKind.ClassDeclaration],
+        nodeType: [TS.SyntaxKind.ClassDeclaration, TS.SyntaxKind.InterfaceDeclaration],
         propertyMatches: {
             identifier: function (node, refNode) {
                 refNode.target = node;

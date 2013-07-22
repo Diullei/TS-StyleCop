@@ -18,7 +18,7 @@ export var rule = <RuleConfig>{
     howToFix:
     'To fix a violation of this rule, change the name of the element so that it begins with an upper-case letter',
     matcher: {
-        nodeType: [TS.SyntaxKind.ClassDeclaration],
+        nodeType: [TS.SyntaxKind.ClassDeclaration, TS.SyntaxKind.InterfaceDeclaration],
         propertyMatches: {
             identifier: (node, refNode): bool => {
                 refNode.target = node;

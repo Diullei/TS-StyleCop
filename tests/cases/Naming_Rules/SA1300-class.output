@@ -1,5 +1,5 @@
 ﻿
- ==== [36m[1mtests/cases/Naming_Rules/SA1300-01.ts[0m ====
+ ==== [36m[1mtests/cases/Naming_Rules/SA1300-class.ts[0m ====
  #1 [36m[1m[[31m[1mSA1300[36m[1m][0m Element must begin with upper case letter
    [33m[1mclass className1 { }[0m // Line 1, Pos 7
          [31m[1m^^^^^^^^^^[0m

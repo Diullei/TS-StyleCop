@@ -34,14 +34,15 @@ qunit.test('Running naming rule cases...', function () {
     cases.forEach((file) => {
         execTest(file, (err, content?) => {
             var baseline = fs.readFileSync(file.replace(/\.ts$/g, '.output'), 'utf8');
-            //console.log(baseline.trim())
-            //console.log(content.trim())
 
             var res = baseline.trim() == content.trim();
             if (!res) failure = true;
             ok(res, file);
+
             index++;
-            if (index < cases.length) {
+            if (index === cases.length) {
+                if (failure) exitcode = 1;
+                console.log('exitcode: ' + exitcode);
                 process.exit(exitcode);
             }
         });
