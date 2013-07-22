@@ -19,9 +19,8 @@ TS-StyleCop provides value by enforcing a common set of style rules for TypeScri
 
 #### Example
 
-1. Having the following file:
+1. Having the following file (test.ts):
 
-> test.ts
 ```javascript
 var Myvar = 1;
 
@@ -36,15 +35,15 @@ class anotherClass {
     }
 }
 
-class class3 { }
-```	
+class Class3 { }
+```
 
 2. Executing TS_StypeCop to this file:
 
 	tscop test.ts
 
 3. Command output will be:
-
+```
 	 ==== .\test.ts ====
 	 #1 [SA1301] Element must begin with lower case letter
 	   var Myvar = 1; // Line 1, Pos 5
@@ -61,9 +60,7 @@ class class3 { }
 	 #5 [SA1301] Element must begin with lower case letter
 		   public MyMethodName(): string{ // Line 5, Pos 12
 				  ^^^^^^^^^^^^
-	 #6 [SA1300] Element must begin with upper case letter
-	   class class3 { } // Line 9, Pos 7
-			 ^^^^^^
+```
 	
 ### Build
 
