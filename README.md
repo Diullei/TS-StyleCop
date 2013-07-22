@@ -38,7 +38,7 @@ class anotherClass {
 class Class3 { }
 ```
 
-2. Executing TS_StypeCop to this file:
+2. Executing *TS-StypeCop* to this file:
 
         tscop test.ts
 
