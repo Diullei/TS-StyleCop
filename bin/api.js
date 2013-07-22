@@ -389,7 +389,10 @@ var TypeScriptCompiler = (function () {
         compiler.settings.codeGenTarget = TS.LanguageVersion.EcmaScript5;
         compiler.settings.moduleGenTarget = TS.ModuleGenTarget.Synchronous;
 
+        compiler.addSourceUnit(file, TS.ScriptSnapshot.fromString(__dirname + '/lib.d.ts'), 0, 0, false);
+
         compiler.addSourceUnit(file, TS.ScriptSnapshot.fromString(code), 0, 0, false);
+
         compiler.pullTypeCheck();
 
         var compilationSettings = new TS.CompilationSettings();
