@@ -374,11 +374,33 @@ var TypeScriptCompiler = (function () {
             _this.registerRule(rule);
         });
     }
+    TypeScriptCompiler.prototype.getPosition = function (source, position) {
+        var index = position;
+        if (position > 0) {
+            while (index > 0 && source[index] != '\n') {
+                index--;
+            }
+
+            return {
+                col: index != 0 ? position - index : position + 1,
+                text: source.substr(index).match(/[^\r\n]+/g)[0],
+                line: index != 0 ? source.substr(0, index).match(/[^\r\n]+/g).length + 1 : 1
+            };
+        } else {
+            return {
+                col: position - index,
+                text: source.match(/[^\r\n]+/g)[0],
+                line: 1
+            };
+        }
+    };
+
     TypeScriptCompiler.prototype.registerRule = function (rule) {
         (TS.PositionTrackingWalker).registerRule(rule);
     };
 
     TypeScriptCompiler.prototype.validate = function (code) {
+        var _this = this;
         (TS.PositionTrackingWalker).violations = [];
 
         this.index++;
@@ -398,6 +420,13 @@ var TypeScriptCompiler = (function () {
         var compilationEnvironment = new TS.CompilationEnvironment(compilationSettings, IO);
         var semanticDiagnostics = compiler.getSemanticDiagnostics(file);
         compiler.reportDiagnostics(semanticDiagnostics, new ErrorReporter());
+
+        ((TS.PositionTrackingWalker).violations).forEach(function (violation) {
+            var node = violation.node;
+            var position = _this.getPosition(node._sourceText.scriptSnapshot.text, node._fullStart);
+            violation.position = position;
+            violation.textValue = node.valueText();
+        });
 
         return (TS.PositionTrackingWalker).violations;
     };

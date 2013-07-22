@@ -22,11 +22,19 @@ declare enum ViolationType {
     TSStyleCop,
 }
 
+interface IPosition {
+    text: string;
+    col: number;
+    line: number;
+}
+
 interface IViolation {
     type: ViolationType;
     code?: string;
     message: string;
     node: TypeScript.ISyntaxToken;//SyntaxNode;
+    position?: IPosition;
+    textValue: string;
 }
 
 declare class TypeScriptCompiler {

@@ -25,11 +25,19 @@ declare enum ViolationType {
     TSStyleCop,
 }
 
+interface IPosition {
+    text: string;
+    col: number;
+    line: number;
+}
+
 interface IViolation {
     type: ViolationType;
     code?: string;
     message: string;
     node: TypeScript.ISyntaxToken;//SyntaxNode;
+    position?: IPosition;
+    textValue: string;
 }
 
 class ErrorReporter implements TypeScript.IDignosticsReporter {
@@ -53,6 +61,31 @@ class TypeScriptCompiler {
         rules.forEach((rule: RuleConfig) => {
             this.registerRule(rule);
         });
+    }
+
+    private getPosition(source: string, position: number): IPosition {
+        var index = position;
+        if (position > 0) {
+            while (index > 0 && source[index] != '\n') {
+                index--;
+            }
+
+            return {
+                col: index != 0
+                ? position - index
+                : position + 1,
+                text: source.substr(index).match(/[^\r\n]+/g)[0],
+                line: index != 0
+                ? source.substr(0, index).match(/[^\r\n]+/g).length + 1
+                : 1
+            };
+        } else {
+            return {
+                col: position - index,
+                text: source.match(/[^\r\n]+/g)[0],
+                line: 1
+            };
+        }
     }
 
     private registerRule(rule: RuleConfig) {
@@ -79,6 +112,14 @@ class TypeScriptCompiler {
         var compilationEnvironment = new TS.CompilationEnvironment(compilationSettings, IO);
         var semanticDiagnostics = compiler.getSemanticDiagnostics(file);
         compiler.reportDiagnostics(semanticDiagnostics, new ErrorReporter());
+
+        (<any[]>(<any>TS.PositionTrackingWalker).violations).forEach((violation: IViolation) => {
+            // TODO: create an interface no node
+            var node = <any>violation.node;
+            var position = this.getPosition(node._sourceText.scriptSnapshot.text, node._fullStart);
+            violation.position = position;
+            violation.textValue = node.valueText();
+        });
 
         return (<any>TS.PositionTrackingWalker).violations;
     }

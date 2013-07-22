@@ -549,40 +549,8 @@ var Batch = (function () {
         this.ioHost.printLine("Version " + version);
     };
 
-    Batch.prototype.getLine = function (source, position) {
-        var index = position;
-        if (position > 0) {
-            while (index > 0 && source[index] != '\n') {
-                index--;
-            }
-
-            return {
-                index: index != 0 ? position - index : position + 1,
-                text: source.substr(index).match(/[^\r\n]+/g)[0],
-                line: index != 0 ? source.substr(0, index).match(/[^\r\n]+/g).length + 1 : 1
-            };
-        } else {
-            return {
-                index: position - index,
-                text: source.match(/[^\r\n]+/g)[0],
-                line: 1
-            };
-        }
-    };
-
-    Batch.prototype.pad = function (value, count) {
-        var result = '';
-        for (var i = 0; i < count; i++) {
-            result += value;
-        }
-        return result;
-    };
-
     Batch.prototype.printViolations = function (file, violations) {
         var _this = this;
-        this.ioHost.printLine('');
-        this.ioHost.printLine(' ==== \33[36m\33[1m' + file + '\33[0m ====');
-
         var printTSStyleCopViolation = function (violation, index) {
             _this.ioHost.printLine(' #' + index + ' \33[36m\33[1m\[\33[31m\33[1m' + violation.code + '\33[36m\33[1m\]\33[0m ' + violation.message);
 
@@ -590,17 +558,24 @@ var Batch = (function () {
                 _this.api.inspect(violation.node);
             }
 
-            var node = violation.node;
+            var pad = function (value, count) {
+                var result = '';
+                for (var i = 0; i < count; i++) {
+                    result += value;
+                }
+                return result;
+            };
 
-            var line = _this.getLine(node._sourceText.scriptSnapshot.text, node._fullStart);
-
-            _this.ioHost.printLine('   \33[33m\33[1m' + line.text + '\33[0m // Line ' + line.line + ', Pos ' + line.index);
-            _this.ioHost.printLine('  ' + _this.pad(' ', line.index) + '\33[31m\33[1m' + _this.pad('^', node.valueText().length) + '\33[0m');
+            _this.ioHost.printLine('   \33[33m\33[1m' + violation.position.text + '\33[0m // Line ' + violation.position.line + ', Pos ' + violation.position.col);
+            _this.ioHost.printLine('  ' + pad(' ', violation.position.col) + '\33[31m\33[1m' + pad('^', violation.textValue.length) + '\33[0m');
         };
 
         var printTypeScriptViolation = function (violation, index) {
             _this.ioHost.printLine('\33[31m\33[1m>\33[0m  #' + index + ' ' + violation.message);
         };
+
+        this.ioHost.printLine('');
+        this.ioHost.printLine(' ==== \33[36m\33[1m' + file + '\33[0m ====');
 
         violations.forEach(function (violation, index) {
             if (violation.node) {
