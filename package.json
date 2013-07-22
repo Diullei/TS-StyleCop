@@ -1,7 +1,7 @@
 {
   "name": "tscop",
   "description": "TypeScript StypeCop.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Diullei Gomes",
   "licenses": [
     {
@@ -9,9 +9,6 @@
       "url": "https://raw.github.com/Diullei/ts-StyleCop/master/LICENSE.txt"
     }
   ],
-  "main": {
-    "tscop": "bin/api.js"
-  },
   "homepage": "https://github.com/Diullei/ts-StyleCop",
   "engines": {
     "node": ">= 0.8.0"
@@ -55,7 +52,10 @@
     "grunt": "~0.4.1"
   },
   "bin": {
-    "tscop": "bin/cli.js"
+    "tscop": "bin/tscop"
+  },
+  "main": {
+    "tscop": "bin/tscop"
   },
   "scripts": {
 	"build": "grunt default",
