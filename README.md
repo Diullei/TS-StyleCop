@@ -17,6 +17,54 @@ TS-StyleCop provides value by enforcing a common set of style rules for TypeScri
 
     tscop hello.ts
 
+#### Example
+
+1. Having the following file:
+
+> test.ts
+```javascript
+var Myvar = 1;
+
+class class1 { }
+
+class class2 { }
+
+class anotherClass {
+
+    public MyMethodName(): string{
+        return null;
+    }
+}
+
+class class3 { }
+```	
+
+2. Executing TS_StypeCop to this file:
+
+	tscop test.ts
+
+3. Command output will be:
+
+	 ==== .\test.ts ====
+	 #1 [SA1301] Element must begin with lower case letter
+	   var Myvar = 1; // Line 1, Pos 5
+		   ^^^^^
+	 #2 [SA1300] Element must begin with upper case letter
+	   class class1 { } // Line 2, Pos 7
+			 ^^^^^^
+	 #3 [SA1300] Element must begin with upper case letter
+	   class class2 { } // Line 3, Pos 7
+			 ^^^^^^
+	 #4 [SA1300] Element must begin with upper case letter
+	   class anotherClass { // Line 4, Pos 7
+			 ^^^^^^^^^^^^
+	 #5 [SA1301] Element must begin with lower case letter
+		   public MyMethodName(): string{ // Line 5, Pos 12
+				  ^^^^^^^^^^^^
+	 #6 [SA1300] Element must begin with upper case letter
+	   class class3 { } // Line 9, Pos 7
+			 ^^^^^^
+	
 ### Build
 
 1. Install Node if you haven't already (http://nodejs.org/)
