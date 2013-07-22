@@ -44,7 +44,7 @@ class Class3 { }
 
 3. The command output will be:
 
-![Alt text](https://raw.github.com/Diullei/ts-styleCop/master/console.png?login=Diullei&token=68a784cff0f8e5795d92e5dc73d05da8)
+![](https://raw.github.com/Diullei/TS-StyleCop/master/console.png?login=Diullei&token=b05bd0e74d256c64e80fb066bcc8faa4)
 	
 ### Build
 
