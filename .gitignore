@@ -15,6 +15,9 @@ npm-debug.log
 
 *.js
 
+node_modules
+test.ts
+
 # exceptions
 !Gruntfile.js
 !src/typescript-adapter.js
@@ -23,5 +26,3 @@ npm-debug.log
 !bin/*/*.js
 !bin/*/*/*.js
 !bin/*/*/*/*.js
-
-test.ts
