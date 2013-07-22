@@ -18,6 +18,8 @@ npm-debug.log
 node_modules
 test.ts
 
+tests/output/*.output
+
 # exceptions
 !Gruntfile.js
 !src/typescript-adapter.js

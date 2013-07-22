@@ -1,0 +1,25 @@
+{
+    "localPath": "typings",
+    "libPath": "lib",
+    "repo": {
+        "uriList": [
+            {
+                "sourceType": 1,
+                "source": "http://www.tsdpm.com/repository_v2.json"
+            }
+        ]
+    },
+    "dependencies": {
+        "qunit@1.10": {
+            "repo": {
+                "sourceType": 1,
+                "source": "http://www.tsdpm.com/repository_v2.json"
+            },
+            "key": "31f242da-ab6d-4b58-bacd-a6f493971a7a",
+            "uri": {
+                "source": "https://github.com/borisyankov/DefinitelyTyped/raw/master/qunit/qunit.d.ts",
+                "sourceType": 1
+            }
+        }
+    }
+}

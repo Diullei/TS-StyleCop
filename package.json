@@ -58,7 +58,8 @@
     "tscop": "bin/cli.js"
   },
   "scripts": {
-	"build": "grunt default"
+	"build": "grunt default",
+	"test": "node tests/qunit/qunit-run.js tests/runner.js"
   },
   "preferGlobal": true
 }
