@@ -20559,14 +20559,7 @@ PositionTrackingWalker.prototype.matches = function (node, matcher, refNode) {
     if (typeof matcher.propertyMatches !== 'undefined') {
         for (var prop in matcher.propertyMatches) {
             if (!(prop in node)) {
-                if (process.env.DEBUG) {
-                    console.log("**** [!] " + prop + " NOT EXISTS ON RULE MATCH ****");
-                }
                 continue;
-            } else {
-                if (process.env.DEBUG) {
-                    console.log("**** " + prop + " OK ON RULE MATCH ****");
-                }
             }
 
             var astProp = node[prop];
