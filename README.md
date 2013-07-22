@@ -75,10 +75,11 @@ The implemented rules until now are:
 	* **SA1300:** *The name of a TypeScript element does not begin with an upper-case letter.*
 	* **SA1301:** *The name of a TypeScript element does not begin with an lower-case letter.*
 
-> I'm working on porting all this rules: http://www.stylecop.com/docs/StyleCop%20Rules.html
+> I'm working on porting and adapt all this rules: http://www.stylecop.com/docs/StyleCop%20Rules.html
 
 ### Roadmap
 
+* Add unit tests
 * Improving the interface to create rules
 * IMplement a set of rules
 * Refactor the code
