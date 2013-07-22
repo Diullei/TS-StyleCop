@@ -5,7 +5,11 @@
 var TS = <TypeScript>require('./typescript').TypeScript;
 
 class Batch {
-    private api = <{ verify: (code: string) => IViolation[]; registerRule: (rule: RuleConfig) => any; }>require('./api');
+    private api = <{
+        verify: (code: string) => IViolation[];
+        registerRule: (rule: RuleConfig) => any;
+        inspect: (obj: any) => any;
+    }>require('./api');
 
     constructor(private ioHost: IIO) {
     }
@@ -16,6 +20,7 @@ class Batch {
         this.ioHost.printLine("Version " + version);
     }
 
+    // TODO: stract this to API
     private getLine(source: string, position: number): { index: number; text: string; line: number; } {
         var index = position;
         if (position > 0) {
@@ -23,9 +28,21 @@ class Batch {
                 index--;
             }
 
-            return { index: position - index, text: source.substr(index).match(/[^\r\n]+/g)[0], line: source.substr(0, index).match(/[^\r\n]+/g).length + 1 };
+            return {
+                index: index != 0 
+                    ? position - index
+                    : position + 1,
+                text: source.substr(index).match(/[^\r\n]+/g)[0],
+                line: index != 0 
+                    ? source.substr(0, index).match(/[^\r\n]+/g).length + 1
+                    : 1
+            };
         } else {
-            return { index: position - index, text: source.match(/[^\r\n]+/g)[0], line: 1 };
+            return {
+                index: position - index,
+                text: source.match(/[^\r\n]+/g)[0],
+                line: 1
+            };
         }
     }
 
@@ -44,10 +61,13 @@ class Batch {
         var printTSStyleCopViolation = (violation: IViolation, index: number) => {
             this.ioHost.printLine(' #' + index + ' \33[36m\33[1m\[\33[31m\33[1m' + violation.code + '\33[36m\33[1m\]\33[0m ' + violation.message);
 
-            //console.log(violation.node);
+            if (process.env.DEBUG) {
+                this.api.inspect(violation.node);
+            }
 
             var node = <any>violation.node;
             // TODO: create an interface no node
+            // TODO: stract to API
             var line = this.getLine(node._sourceText.scriptSnapshot.text, node._fullStart);
 
             this.ioHost.printLine('   \33[33m\33[1m' + line.text + '\33[0m // Line ' + line.line + ', Pos ' + line.index);
@@ -59,10 +79,12 @@ class Batch {
         };
 
         violations.forEach((violation: IViolation, index: number) => {
-            if (violation.type == /*ViolationType.TSStyleCop*/1) {
-                printTSStyleCopViolation(violation, index + 1);
-            } else if (violation.type == /*ViolationType.TypeScript*/0) {
-                printTypeScriptViolation(violation, index + 1);
+            if (violation.node) {
+                if (violation.type == /*ViolationType.TSStyleCop*/1) {
+                    printTSStyleCopViolation(violation, index + 1);
+                } else if (violation.type == /*ViolationType.TypeScript*/0) {
+                    printTypeScriptViolation(violation, index + 1);
+                }
             }
         });
     } 

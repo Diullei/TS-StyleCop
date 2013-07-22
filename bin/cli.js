@@ -556,9 +556,17 @@ var Batch = (function () {
                 index--;
             }
 
-            return { index: position - index, text: source.substr(index).match(/[^\r\n]+/g)[0], line: source.substr(0, index).match(/[^\r\n]+/g).length + 1 };
+            return {
+                index: index != 0 ? position - index : position + 1,
+                text: source.substr(index).match(/[^\r\n]+/g)[0],
+                line: index != 0 ? source.substr(0, index).match(/[^\r\n]+/g).length + 1 : 1
+            };
         } else {
-            return { index: position - index, text: source.match(/[^\r\n]+/g)[0], line: 1 };
+            return {
+                index: position - index,
+                text: source.match(/[^\r\n]+/g)[0],
+                line: 1
+            };
         }
     };
 
@@ -578,6 +586,10 @@ var Batch = (function () {
         var printTSStyleCopViolation = function (violation, index) {
             _this.ioHost.printLine(' #' + index + ' \33[36m\33[1m\[\33[31m\33[1m' + violation.code + '\33[36m\33[1m\]\33[0m ' + violation.message);
 
+            if (process.env.DEBUG) {
+                _this.api.inspect(violation.node);
+            }
+
             var node = violation.node;
 
             var line = _this.getLine(node._sourceText.scriptSnapshot.text, node._fullStart);
@@ -591,10 +603,12 @@ var Batch = (function () {
         };
 
         violations.forEach(function (violation, index) {
-            if (violation.type == 1) {
-                printTSStyleCopViolation(violation, index + 1);
-            } else if (violation.type == 0) {
-                printTypeScriptViolation(violation, index + 1);
+            if (violation.node) {
+                if (violation.type == 1) {
+                    printTSStyleCopViolation(violation, index + 1);
+                } else if (violation.type == 0) {
+                    printTypeScriptViolation(violation, index + 1);
+                }
             }
         });
     };

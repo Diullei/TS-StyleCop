@@ -20,10 +20,10 @@ export var rule = <RuleConfig>{
     matcher: {
         nodeType: [TS.SyntaxKind.ClassDeclaration],
         propertyMatches: {
-            identifier: (node): bool => {
+            identifier: (node, refNode): bool => {
+                refNode.target = node;
                 return !(/[a-z]/.test(node.text()[0]))
             }
         }
     }
 };
-//'//SuppressMessage: "TS-StyleCop.TypeScript.NamingRules", "SA1300:ElementMustBeginWithUpperCaseLetter", Justification = "Reviewed."',

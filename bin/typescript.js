@@ -20553,22 +20553,36 @@ PositionTrackingWalker.registerRule = function (extension) {
 
 // verify rule match
 PositionTrackingWalker.prototype.matches = function (node, matcher, refNode) {
+    var flg = true;
     if (matcher.nodeType.indexOf(node.kind()) == -1)
-        return false;
+        return true;
     if (typeof matcher.propertyMatches !== 'undefined') {
         for (var prop in matcher.propertyMatches) {
-            if (!(prop in node))
-                return false;
+            if (!(prop in node)) {
+                if (process.env.DEBUG) {
+                    console.log("**** [!] " + prop + " NOT EXISTS ON RULE MATCH ****");
+                }
+                continue;
+            } else {
+                if (process.env.DEBUG) {
+                    console.log("**** " + prop + " OK ON RULE MATCH ****");
+                }
+            }
+
             var astProp = node[prop];
-            refNode.target = astProp;
+
             var matcherProp = matcher.propertyMatches[prop];
             if (typeof matcherProp === 'function') {
-                if (!matcherProp(astProp))
+                if (!matcherProp(astProp, refNode))
                     return false;
+            } else {
+                if (process.env.DEBUG) {
+                    console.log("**** " + prop + " IS NOT A FUNCTION ****");
+                }
             }
         }
     }
-    return true;
+    return flg;
 };
 
 PositionTrackingWalker.prototype.ruleHandled = function (node) {
@@ -20594,6 +20608,7 @@ PositionTrackingWalker.prototype.ruleHandled = function (node) {
 
 // entry point
 PositionTrackingWalker.prototype.visitNode = function (node) {
+    //console.log(node)
     this.ruleHandled(node);
     node.accept(this);
 };

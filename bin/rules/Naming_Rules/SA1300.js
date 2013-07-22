@@ -11,7 +11,8 @@ exports.rule = {
     matcher: {
         nodeType: [TS.SyntaxKind.ClassDeclaration],
         propertyMatches: {
-            identifier: function (node) {
+            identifier: function (node, refNode) {
+                refNode.target = node;
                 return !(/[a-z]/.test(node.text()[0]));
             }
         }

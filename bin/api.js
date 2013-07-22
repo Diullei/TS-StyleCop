@@ -401,7 +401,20 @@ var TypeScriptCompiler = (function () {
     };
     return TypeScriptCompiler;
 })();
+var util = require('util');
+
+var config = require('./config');
+process.env = config.env;
+
+if (process.env.DEBUG) {
+    console.log("**** DEBUG MODE ****");
+}
+
 var rules = [];
+
+var inspect = function (obj) {
+    console.log(util.inspect(obj, false, 10, true));
+};
 
 var registerRule = function (rule) {
     rules.push(rule);
@@ -419,3 +432,5 @@ exports.verify = function (code) {
     var compiler = new TypeScriptCompiler(rules);
     return compiler.validate(code);
 };
+
+exports.inspect = inspect;

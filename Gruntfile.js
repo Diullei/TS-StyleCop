@@ -16,7 +16,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         clean: {
-            bin: ['bin/api.js', 'bin/cli.js', 'bin/javascript.js', 'bin/rules']
+            bin: ['bin/api.js', 'bin/cli.js', 'bin/javascript.js', 'bin/rules', 'bin/config.json']
         },
         typescript: {
             options: {
@@ -48,14 +48,21 @@ module.exports = function (grunt) {
                     to: grunt.file.read('src/typescript-adapter.js')
                 }]
             }
-        }
+        },
+        copy: {
+            config: {
+                    files: [
+                        { src: 'src/config.json', dest: './bin/config.json' }
+                    ]
+            }
+        },
     });
 
     grunt.registerTask('compile-api', ['typescript:api']);
     grunt.registerTask('compile-cli', ['typescript:cli']);
     grunt.registerTask('compile-rules', ['typescript:rules']);
     grunt.registerTask('replace-ts', ['replace:tssource']);
-    grunt.registerTask('build', ['clean:bin', 'compile-api', 'compile-cli', 'compile-rules', 'replace-ts']);
+    grunt.registerTask('build', ['clean:bin', 'compile-api', 'compile-cli', 'compile-rules', 'replace-ts', 'copy:config']);
 
     grunt.registerTask('default', ['build']);
 };

@@ -691,6 +691,7 @@ declare class Enumerator {
     constructor(o: any);
 }
 declare module process {
+    var env: any;
     var argv: string[];
     var platform: string;
     function on(event: string, handler: (any: any) => void): void;
