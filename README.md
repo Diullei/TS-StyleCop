@@ -27,10 +27,9 @@ TS-StyleCop provides value by enforcing a common set of style rules for TypeScri
 ### TS-StyleCop rules
 The implemented rules until now are:
 
-* Naming Rules (SA1300-)
-Rules which enforce naming requirements for members, types, and variables.
-	* **SA1300:*The name of a TypeScript element does not begin with an upper-case letter.*
-	* **SA1301: *The name of a TypeScript element does not begin with an lower-case letter.*
+* **Naming Rules (SA13*)** Rules which enforce naming requirements for members, types, and variables.
+	* **SA1300:** *The name of a TypeScript element does not begin with an upper-case letter.*
+	* **SA1301:** *The name of a TypeScript element does not begin with an lower-case letter.*
 
 > I'm working on porting all this rules: http://www.stylecop.com/docs/StyleCop%20Rules.html
 
