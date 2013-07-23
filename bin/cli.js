@@ -536,7 +536,39 @@ var OptionsParser = (function () {
     };
     return OptionsParser;
 })();
+var Render = (function () {
+    function Render() {
+        this.terminal = require('../src/cli-render/terminal-color.js');
+        this.handlebars = require('handlebars');
+        this.fs = require('fs');
+        this.path = require('path');
+        this.cache = {};
+    }
+    Render.prototype.load = function (template, data) {
+        if (this.cache[template]) {
+            return this.cache[template](data);
+        }
+
+        var contents = this.fs.readFileSync(template).toString();
+        this.cache[template] = this.handlebars.compile(contents);
+
+        return this.cache[template](data);
+    };
+
+    Render.prototype.validate = function (data) {
+        for (var attr in this.terminal.Colors) {
+            if (!data[attr]) {
+                data[attr] = (!process.env.SHOW_COLORS ? '' : this.terminal.Colors[attr]);
+            }
+        }
+
+        return this.load('../src/cli-render/templates/validating.tmpl', data);
+    };
+    return Render;
+})();
+require('colors');
 var TS = require('./typescript').TypeScript;
+var Enumerable = require('./libs/linq');
 
 var Batch = (function () {
     function Batch(ioHost) {
@@ -550,42 +582,25 @@ var Batch = (function () {
     };
 
     Batch.prototype.printViolations = function (file, violations) {
-        var _this = this;
-        var printTSStyleCopViolation = function (violation, index) {
-            _this.ioHost.printLine(' #' + index + ' \33[36m\33[1m\[\33[31m\33[1m' + violation.code + '\33[36m\33[1m\]\33[0m ' + violation.message);
-
-            if (process.env.DEBUG) {
-                _this.api.inspect(violation.node);
+        var pad = function (value, count) {
+            var result = '';
+            for (var i = 0; i < count; i++) {
+                result += value;
             }
-
-            var pad = function (value, count) {
-                var result = '';
-                for (var i = 0; i < count; i++) {
-                    result += value;
-                }
-                return result;
-            };
-
-            _this.ioHost.printLine('   \33[33m\33[1m' + violation.position.text + '\33[0m // Line ' + violation.position.line + ', Pos ' + violation.position.col);
-            _this.ioHost.printLine('  ' + pad(' ', violation.position.col) + '\33[31m\33[1m' + pad('^', violation.textValue.length) + '\33[0m');
+            return result;
         };
 
-        var printTypeScriptViolation = function (violation, index) {
-            _this.ioHost.printLine('\33[31m\33[1m>\33[0m  #' + index + ' ' + violation.message);
-        };
+        var index = 1;
 
-        this.ioHost.printLine('');
-        this.ioHost.printLine(' ==== \33[36m\33[1m' + file + '\33[0m ====');
-
-        violations.forEach(function (violation, index) {
-            if (violation.node) {
-                if (violation.type == 1) {
-                    printTSStyleCopViolation(violation, index + 1);
-                } else if (violation.type == 0) {
-                    printTypeScriptViolation(violation, index + 1);
-                }
-            }
+        Enumerable.from(violations).forEach(function (violation) {
+            (violation).underline = pad(' ', violation.position.col) + pad((!process.env.SHOW_COLORS ? '^' : '^'.red), violation.textValue.length);
+            (violation).index = index++;
+            violation.position.text = violation.position.text.substr(0, violation.position.col - 1) + (!process.env.SHOW_COLORS ? violation.textValue : violation.textValue.cyan) + violation.position.text.substr(violation.position.col - 1 + violation.textValue.length);
         });
+
+        var out = new Render().validate({ file: file, violations: violations, violation_count: violations.length });
+
+        this.ioHost.printLine(out);
     };
 
     Batch.prototype.run = function () {
@@ -609,6 +624,19 @@ var Batch = (function () {
                 _this.printVersion();
             }
         }, 'v');
+
+        opts.option('show_colors', {
+            usage: 'Show console colors',
+            set: function (arg) {
+                if (arg) {
+                    if (arg == 'false') {
+                        process.env.SHOW_COLORS = false;
+                    } else {
+                        process.env.SHOW_COLORS = true;
+                    }
+                }
+            }
+        });
 
         opts.parse(IO.arguments);
 

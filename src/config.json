@@ -1,5 +1,6 @@
 {
 	"env": {
-		"DEBUG": false
+		"DEBUG": false,
+		"SHOW_COLORS": true
 	}
 }

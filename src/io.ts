@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-declare var require: any;
+///<reference path="common.d.ts" />
 
 enum ByteOrderMark {
     None,

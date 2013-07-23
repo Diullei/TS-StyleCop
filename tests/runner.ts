@@ -11,14 +11,17 @@ var exec = require('child_process').exec;
 
 qunit.module('Naming rules');
 
+process.chdir(path.join("bin"));
+
 var execTest = (testFile: string, done: (err, content?) => any) => {
-    var command = "node bin/tscop " + testFile;
+
+    var command = "node tscop " + testFile + " --show_colors false";
 
     exec(command, function (error, stdout, stderr) {
         if (error !== null) {
             done(error);
         } else {
-            IO.writeFile('tests/output/' + path.basename(testFile, '.ts') + '.output', stdout, true);
+            IO.writeFile('../tests/output/' + path.basename(testFile, '.ts') + '.output', stdout, true);
             done(null, stdout);
         }
     });
@@ -29,7 +32,7 @@ var index = 0;
 
 qunit.test('Running naming rule cases...', function () {
 
-    var cases = IO.dir('tests/cases/Naming_Rules', /\.ts$/g);
+    var cases = IO.dir('../tests/cases/Naming_Rules', /\.ts$/g);
 
     cases.forEach((file) => {
         execTest(file, (err, content?) => {

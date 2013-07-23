@@ -1,8 +1,12 @@
 /// <reference path="compiler.d.ts" />
-///<reference path='compiler.d.ts' />
+/// <reference path='compiler.d.ts' />
 /// <reference path="optionsParser.ts" />
+/// <reference path='cli-render/render.ts' />
+/// <reference path='typings/linq/linqjs.d.ts' />
 
+require('colors');
 var TS = <TypeScript>require('./typescript').TypeScript;
+var Enumerable = <linqjs.EnumerableStatic>require('./libs/linq');
 
 class Batch {
     private api = <{
@@ -21,41 +25,29 @@ class Batch {
     }
 
     private printViolations(file: string, violations: IViolation[]) {
-        var printTSStyleCopViolation = (violation: IViolation, index: number) => {
-            this.ioHost.printLine(' #' + index + ' \33[36m\33[1m\[\33[31m\33[1m' + violation.code + '\33[36m\33[1m\]\33[0m ' + violation.message);
 
-            if (process.env.DEBUG) {
-                this.api.inspect(violation.node);
+        var pad = (value, count) => {
+            var result = '';
+            for (var i = 0; i < count; i++) {
+                result += value;
             }
+            return result;
+        }
 
-            var pad = (value, count) => {
-                var result = '';
-                for (var i = 0; i < count; i++) {
-                    result += value;
-                }
-                return result;
-            }
+        var index = 1;
 
-            this.ioHost.printLine('   \33[33m\33[1m' + violation.position.text + '\33[0m // Line ' + violation.position.line + ', Pos ' + violation.position.col);
-            this.ioHost.printLine('  ' + pad(' ', violation.position.col) + '\33[31m\33[1m' + pad('^', violation.textValue.length) + '\33[0m');
-        };
+        Enumerable.from(violations)
+            .forEach((violation: IViolation) => {
+                (<any>violation).underline = pad(' ', violation.position.col) + pad((!process.env.SHOW_COLORS ? '^' : '^'.red), violation.textValue.length);
+                (<any>violation).index = index++;
+                violation.position.text = violation.position.text.substr(0, violation.position.col - 1)
+                    + (!process.env.SHOW_COLORS ? violation.textValue : violation.textValue.cyan)
+                    + violation.position.text.substr(violation.position.col - 1 + violation.textValue.length);
+            });
 
-        var printTypeScriptViolation = (violation: IViolation, index: number) => {
-            this.ioHost.printLine('\33[31m\33[1m>\33[0m  #' + index + ' ' + violation.message);
-        };
+        var out = new Render().validate({ file: file, violations: violations, violation_count: violations.length });
 
-        this.ioHost.printLine('');
-        this.ioHost.printLine(' ==== \33[36m\33[1m' + file + '\33[0m ====');
-
-        violations.forEach((violation: IViolation, index: number) => {
-            if (violation.node) {
-                if (violation.type == /*ViolationType.TSStyleCop*/1) {
-                    printTSStyleCopViolation(violation, index + 1);
-                } else if (violation.type == /*ViolationType.TypeScript*/0) {
-                    printTypeScriptViolation(violation, index + 1);
-                }
-            }
-        });
+        this.ioHost.printLine(out);
     } 
 
     public run() {
@@ -78,6 +70,19 @@ class Batch {
                 this.printVersion();
             }
         }, 'v');
+
+        opts.option('show_colors', {
+            usage: 'Show console colors',
+            set: (arg) => {
+                if (arg) {
+                    if (arg == 'false') {
+                        process.env.SHOW_COLORS = false;
+                    } else {
+                        process.env.SHOW_COLORS = true;
+                    }
+                }
+            }
+        });
 
         opts.parse(IO.arguments);
 

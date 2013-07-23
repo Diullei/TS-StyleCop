@@ -16,13 +16,6 @@ PositionTrackingWalker.registerRule = function (extension) {
             arr = PositionTrackingWalker.rulesByNodeType[value];
         }
         arr.push(extension);
-
-        //arr.sort(function (a, b) {
-        //    if (a.matcher.priority > b.matcher.priority)
-        //        return -1; else if (a.matcher.priority == b.matcher.priority)
-        //            return 0; else
-        //            return 1;
-        //});
     });
 };
 
