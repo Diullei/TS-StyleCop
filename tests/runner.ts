@@ -15,7 +15,7 @@ process.chdir(path.join("bin"));
 
 var execTest = (testFile: string, done: (err, content?) => any) => {
 
-    var command = "node tscop " + testFile + " --show_colors false";
+    var command = "node tscop " + testFile + " --hide_colors";
 
     exec(command, function (error, stdout, stderr) {
         if (error !== null) {

@@ -26,8 +26,12 @@ class Batch {
 
     private printViolations(file: string, violations: IViolation[]) {
 
-        var pad = (value, count) => {
+        var pad = (value: string, count: number, length: number, base: string) => {
             var result = '';
+            for (var i = 0; i < length; i++) {
+                result += base[i] != '\t' ? ' ' : base[i];
+            }
+
             for (var i = 0; i < count; i++) {
                 result += value;
             }
@@ -38,11 +42,12 @@ class Batch {
 
         Enumerable.from(violations)
             .forEach((violation: IViolation) => {
-                (<any>violation).underline = pad(' ', violation.position.col) + pad((!process.env.SHOW_COLORS ? '^' : '^'.red), violation.textValue.length);
+                (<any>violation).underline = pad((!process.env.SHOW_COLORS ? '^' : '^'.red), violation.textValue.length, violation.position.col, violation.position.text);
                 (<any>violation).index = index++;
-                violation.position.text = violation.position.text.substr(0, violation.position.col - 1)
-                    + (!process.env.SHOW_COLORS ? violation.textValue : violation.textValue.cyan)
-                    + violation.position.text.substr(violation.position.col - 1 + violation.textValue.length);
+
+                if (process.env.DEBUG) {
+                    this.api.inspect(violation.node);
+                }
             });
 
         var out = new Render().validate({ file: file, violations: violations, violation_count: violations.length });
@@ -71,18 +76,19 @@ class Batch {
             }
         }, 'v');
 
-        opts.option('show_colors', {
+        opts.flag('hide_colors', {
             usage: 'Show console colors',
-            set: (arg) => {
-                if (arg) {
-                    if (arg == 'false') {
-                        process.env.SHOW_COLORS = false;
-                    } else {
-                        process.env.SHOW_COLORS = true;
-                    }
-                }
+            set: () => {
+                process.env.SHOW_COLORS = false;
             }
-        });
+        }, 'c');
+
+        opts.flag('trace', {
+            usage: 'Show trace data',
+            set: () => {
+                process.env.DEBUG = true;
+            }
+        }, 't');
 
         opts.parse(IO.arguments);
 

@@ -5,8 +5,8 @@
 
 {{#each violations}}
   #{{this.index}} [{{this.code}}] {{this.message}}
-    {{this.position.text}} // Line {{this.position.line}}, Pos {{this.position.col}}
-   {{this.underline}}
+     {{this.position.text}} // Line {{this.position.line}}, Pos {{this.position.col}}
+    {{this.underline}}
 {{/each}}
 
  {{red}}[!] Failed{{default}} - {{cyan}}{{violation_count}}{{default}} violations found.

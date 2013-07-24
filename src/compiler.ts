@@ -63,29 +63,32 @@ class TypeScriptCompiler {
         });
     }
 
-    private getPosition(source: string, position: number): IPosition {
-        var index = position;
-        if (position > 0) {
-            while (index > 0 && source[index] != '\n') {
-                index--;
+    private getPosition(source: string, position: number, file: string): IPosition {
+        var soruceUnit = new TS.SourceUnit(file, new FileInformation(source, ByteOrderMark.None));
+        var lineMap = new TS.LineMap(soruceUnit.getLineStartPositions(), soruceUnit.getLength());
+        var lineCol = { line: -1, character: -1 };
+        lineMap.fillLineAndCharacterFromPosition(position, lineCol);
+
+        var lines: string[] = [];
+
+        var line = '';
+        for (var i = 0; i < source.length; i++) {
+            if (source[i] == '\n') {
+                lines.push(line);
+                line = '';
+                continue;
             }
 
-            return {
-                col: index != 0
-                ? position - index
-                : position + 1,
-                text: source.substr(index).match(/[^\r\n]+/g)[0],
-                line: index != 0
-                ? source.substr(0, index).match(/[^\r\n]+/g).length + 1
-                : 1
-            };
-        } else {
-            return {
-                col: position - index,
-                text: source.match(/[^\r\n]+/g)[0],
-                line: 1
-            };
+            if (source[i] != '\r') {
+                line += source[i];
+            }
         }
+
+        return {
+            col: lineCol.character + 1,
+            text: lines[lineCol.line],
+            line: lineCol.line + 1
+        };
     }
 
     private registerRule(rule: RuleConfig) {
@@ -116,7 +119,7 @@ class TypeScriptCompiler {
         (<any[]>(<any>TS.PositionTrackingWalker).violations).forEach((violation: IViolation) => {
             // TODO: create an interface no node
             var node = <any>violation.node;
-            var position = this.getPosition(node._sourceText.scriptSnapshot.text, node._fullStart);
+            var position = this.getPosition(node._sourceText.scriptSnapshot.text, node._fullStart, file);
             violation.position = position;
             violation.textValue = node.valueText();
         });

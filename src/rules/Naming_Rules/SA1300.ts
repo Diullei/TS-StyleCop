@@ -18,11 +18,26 @@ export var rule = <RuleConfig>{
     howToFix:
     'To fix a violation of this rule, change the name of the element so that it begins with an upper-case letter',
     matcher: {
-        nodeType: [TS.SyntaxKind.ClassDeclaration, TS.SyntaxKind.InterfaceDeclaration],
+        nodeType: [TS.SyntaxKind.ClassDeclaration, TS.SyntaxKind.InterfaceDeclaration, TS.SyntaxKind.EnumDeclaration],
         propertyMatches: {
             identifier: (node, refNode): bool => {
                 refNode.target = node;
                 return !(/[a-z]/.test(node.text()[0]))
+            },
+            enumElements: (node, refNode): bool => {
+                // TODO: pass a list of nodes to same violation
+                var arr: any[] = node.elements;
+
+                for (var i = 0; i < arr.length; i++) {
+                    if (arr[i].propertyName) {
+                        if (/[a-z]/.test(arr[i].propertyName.text()[0])) {
+                            refNode.target = arr[i].propertyName;
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
             }
         }
     }

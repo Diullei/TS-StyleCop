@@ -374,25 +374,32 @@ var TypeScriptCompiler = (function () {
             _this.registerRule(rule);
         });
     }
-    TypeScriptCompiler.prototype.getPosition = function (source, position) {
-        var index = position;
-        if (position > 0) {
-            while (index > 0 && source[index] != '\n') {
-                index--;
+    TypeScriptCompiler.prototype.getPosition = function (source, position, file) {
+        var soruceUnit = new TS.SourceUnit(file, new FileInformation(source, ByteOrderMark.None));
+        var lineMap = new TS.LineMap(soruceUnit.getLineStartPositions(), soruceUnit.getLength());
+        var lineCol = { line: -1, character: -1 };
+        lineMap.fillLineAndCharacterFromPosition(position, lineCol);
+
+        var lines = [];
+
+        var line = '';
+        for (var i = 0; i < source.length; i++) {
+            if (source[i] == '\n') {
+                lines.push(line);
+                line = '';
+                continue;
             }
 
-            return {
-                col: index != 0 ? position - index : position + 1,
-                text: source.substr(index).match(/[^\r\n]+/g)[0],
-                line: index != 0 ? source.substr(0, index).match(/[^\r\n]+/g).length + 1 : 1
-            };
-        } else {
-            return {
-                col: position - index,
-                text: source.match(/[^\r\n]+/g)[0],
-                line: 1
-            };
+            if (source[i] != '\r') {
+                line += source[i];
+            }
         }
+
+        return {
+            col: lineCol.character + 1,
+            text: lines[lineCol.line],
+            line: lineCol.line + 1
+        };
     };
 
     TypeScriptCompiler.prototype.registerRule = function (rule) {
@@ -423,7 +430,7 @@ var TypeScriptCompiler = (function () {
 
         ((TS.PositionTrackingWalker).violations).forEach(function (violation) {
             var node = violation.node;
-            var position = _this.getPosition(node._sourceText.scriptSnapshot.text, node._fullStart);
+            var position = _this.getPosition(node._sourceText.scriptSnapshot.text, node._fullStart, file);
             violation.position = position;
             violation.textValue = node.valueText();
         });

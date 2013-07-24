@@ -582,8 +582,13 @@ var Batch = (function () {
     };
 
     Batch.prototype.printViolations = function (file, violations) {
-        var pad = function (value, count) {
+        var _this = this;
+        var pad = function (value, count, length, base) {
             var result = '';
+            for (var i = 0; i < length; i++) {
+                result += base[i] != '\t' ? ' ' : base[i];
+            }
+
             for (var i = 0; i < count; i++) {
                 result += value;
             }
@@ -593,9 +598,12 @@ var Batch = (function () {
         var index = 1;
 
         Enumerable.from(violations).forEach(function (violation) {
-            (violation).underline = pad(' ', violation.position.col) + pad((!process.env.SHOW_COLORS ? '^' : '^'.red), violation.textValue.length);
+            (violation).underline = pad((!process.env.SHOW_COLORS ? '^' : '^'.red), violation.textValue.length, violation.position.col, violation.position.text);
             (violation).index = index++;
-            violation.position.text = violation.position.text.substr(0, violation.position.col - 1) + (!process.env.SHOW_COLORS ? violation.textValue : violation.textValue.cyan) + violation.position.text.substr(violation.position.col - 1 + violation.textValue.length);
+
+            if (process.env.DEBUG) {
+                _this.api.inspect(violation.node);
+            }
         });
 
         var out = new Render().validate({ file: file, violations: violations, violation_count: violations.length });
@@ -625,18 +633,19 @@ var Batch = (function () {
             }
         }, 'v');
 
-        opts.option('show_colors', {
+        opts.flag('hide_colors', {
             usage: 'Show console colors',
-            set: function (arg) {
-                if (arg) {
-                    if (arg == 'false') {
-                        process.env.SHOW_COLORS = false;
-                    } else {
-                        process.env.SHOW_COLORS = true;
-                    }
-                }
+            set: function () {
+                process.env.SHOW_COLORS = false;
             }
-        });
+        }, 'c');
+
+        opts.flag('trace', {
+            usage: 'Show trace data',
+            set: function () {
+                process.env.DEBUG = true;
+            }
+        }, 't');
 
         opts.parse(IO.arguments);
 
