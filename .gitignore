@@ -28,4 +28,5 @@ tests/output/*.output
 !bin/*/*.js
 !bin/*/*/*.js
 !bin/*/*/*/*.js
+!tests/runner.js
 !tests/qunit/*.js
