@@ -5,8 +5,8 @@
 
 
   #1 [SA1300] Element must begin with upper case letter
-    interface myInterface{} // Line 2, Pos 11
-              ^^^^^^^^^^^
+     interface myInterface{} // Line 2, Pos 11
+               ^^^^^^^^^^^
 
 
  [!] Failed - 1 violations found.

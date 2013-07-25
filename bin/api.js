@@ -395,6 +395,8 @@ var TypeScriptCompiler = (function () {
             }
         }
 
+        lines.push(line);
+
         return {
             col: lineCol.character + 1,
             text: lines[lineCol.line],
