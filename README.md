@@ -3,6 +3,9 @@
 
 <a href="#ts-stylecop">TS-StyleCop</a>
 ===========
+[![NPM version](https://badge.fury.io/js/tscop.png)](http://badge.fury.io/js/tscop)
+[![Build Status](https://travis-ci.org/Diullei/TS-StyleCop.png?branch=master)](https://travis-ci.org/Diullei/TS-StyleCop)
+
 
 TS-StyleCop provides value by enforcing a common set of style rules for TypeScript code. TS-StyleCop intend to be a single, consistent set of rules. Developers also will be able to implement their own rules.
 > *Based on C# StyleCop.*
