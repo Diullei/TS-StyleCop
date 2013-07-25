@@ -20,22 +20,32 @@ PositionTrackingWalker.registerRule = function (extension) {
 };
 
 // verify rule match
-PositionTrackingWalker.prototype.matches = function (node, matcher, refNode) {
-    var flg = true;
-    if (matcher.nodeType.indexOf(node.kind()) == -1)
-        return true;
-    if (typeof matcher.propertyMatches !== 'undefined') {
-        for (var prop in matcher.propertyMatches) {
+PositionTrackingWalker.prototype.applyRule = function (node, rule) {
+    if (rule.matcher.nodeType.indexOf(node.kind()) == -1)
+        return;
+    if (typeof rule.matcher.propertyMatches !== 'undefined') {
+        for (var prop in rule.matcher.propertyMatches) {
             if (!(prop in node)) {
                 continue;
             }
 
             var astProp = node[prop];
 
-            var matcherProp = matcher.propertyMatches[prop];
+            var matcherProp = rule.matcher.propertyMatches[prop];
             if (typeof matcherProp === 'function') {
-                if (!matcherProp(astProp, refNode))
-                    return false;
+                var refNode = {};
+
+                if (!matcherProp(astProp, refNode)) {
+                    if (!PositionTrackingWalker.violations)
+                        PositionTrackingWalker.violations = [];
+
+                    PositionTrackingWalker.violations.push({
+                        code: rule.code,
+                        type: /*ViolationType.TSStyleCop*/1,
+                        message: rule.definition,
+                        node: refNode.target
+                    });
+                }
             } else {
                 if (process.env.DEBUG) {
                     console.log("**** " + prop + " IS NOT A FUNCTION ****");
@@ -43,7 +53,6 @@ PositionTrackingWalker.prototype.matches = function (node, matcher, refNode) {
             }
         }
     }
-    return flg;
 };
 
 PositionTrackingWalker.prototype.ruleHandled = function (node) {
@@ -51,18 +60,7 @@ PositionTrackingWalker.prototype.ruleHandled = function (node) {
     var rule = PositionTrackingWalker.rulesByNodeType[node.kind()];
     if (typeof rule !== 'undefined') {
         rule.some(function (rl) {
-            var refNode = {};
-            if (!_this.matches(node, rl.matcher, refNode)) {
-                if (!PositionTrackingWalker.violations)
-                    PositionTrackingWalker.violations = [];
-
-                PositionTrackingWalker.violations.push({
-                    code: rl.code,
-                    type: /*ViolationType.TSStyleCop*/1,
-                    message: rl.definition,
-                    node: refNode.target
-                });
-            }
+            _this.applyRule(node, rl)
         });
     }
 };

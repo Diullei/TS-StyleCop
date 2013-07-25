@@ -1,5 +1,5 @@
 // test...
-enum MyEnum {
+enum myEnum {
     A,
 	b,
     C
