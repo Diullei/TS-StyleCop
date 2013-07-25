@@ -29,10 +29,11 @@ var execTest = (testFile: string, done: (err, content, file: string) => any) => 
 
 var failure = false;
 var index = 0;
+var htmlFile = '../test-report.html';
 
 qunit.test('Running test cases...', function () {
 
-    if (IO.fileExists('../test-report.html')) IO.deleteFile('../test-report.html');
+    if (IO.fileExists(htmlFile)) IO.deleteFile(htmlFile);
 
     var cases = IO.dir('../tests/cases/Naming_Rules', /\.ts$/g);
     var html = '';
@@ -60,10 +61,12 @@ qunit.test('Running test cases...', function () {
                 if (failure) exitcode = 1;
 
                 if (html != '') {
-                    Diff.createHtml('../test-report.html', html);
+                    Diff.createHtml(htmlFile, html);
+                    console.log('exitcode: '.red + exitcode + " - For more details check the '" + htmlFile.cyan + "' file.");
+                } else {
+                    console.log('exitcode: '.green + exitcode);
                 }
 
-                console.log('exitcode: ' + exitcode);
                 process.exit(exitcode);
             }
         });
