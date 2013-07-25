@@ -28,3 +28,4 @@ tests/output/*.output
 !bin/*/*.js
 !bin/*/*/*.js
 !bin/*/*/*/*.js
+!tests/qunit/*.js
