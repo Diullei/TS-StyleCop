@@ -66,7 +66,7 @@ var stopWatch = {
 			exitcode = 1;
 		}
 	};
-
+    
 	qunit.begin = function() {
 		stopWatch.start();
 	};

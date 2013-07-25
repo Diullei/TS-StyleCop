@@ -357,8 +357,8 @@ var Diff;
     Diff.escape = escape;
 
     function diffString(o, n) {
-        o = o.replace(/\s+$/, '');
-        n = n.replace(/\s+$/, '');
+        o = o.toString().replace(/\s+$/, '');
+        n = n.toString().replace(/\s+$/, '');
 
         var out = diff(o == "" ? [] : o.split(/\s+/), n == "" ? [] : n.split(/\s+/));
         var str = "";
