@@ -30,3 +30,4 @@ tests/output/*.output
 !bin/*/*/*/*.js
 !tests/runner.js
 !tests/qunit/*.js
+!src/cli-render/terminal-color.js
