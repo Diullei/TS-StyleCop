@@ -35,8 +35,8 @@ module.exports = function (grunt) {
                 dest: 'bin/cli.js'
             },
             rules: {
-                src: ['src/rules/*/*.ts'],
-                dest: 'bin'
+                src: ['rules/*/*.ts'],
+                dest: 'bin/'
             },
             tests: {
                 src: ['tests/runner.ts'],

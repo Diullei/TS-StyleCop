@@ -1,5 +1,5 @@
-/// <reference path="../../typescript/typescript.d.ts" />
-/// <reference path="../../compiler.d.ts" />
+/// <reference path="../../src/typescript/typescript.d.ts" />
+/// <reference path="../../src/compiler.d.ts" />
 
 declare var require: any;
 
