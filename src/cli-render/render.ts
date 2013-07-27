@@ -1,9 +1,11 @@
 ///<reference path="../common.d.ts" />
 /// <reference path='terminal-color.d.ts' />
 
+declare var __dirname: any;
+
 class Render {
 
-    private terminal = <Terminal>require('../src/cli-render/terminal-color.js');
+    private terminal = <Terminal>require(__dirname + '/../src/cli-render/terminal-color.js');
     private handlebars = require('handlebars');
     private fs = require('fs');
     private path = require('path');
@@ -28,6 +30,6 @@ class Render {
             }
         }
 
-        return this.load('../src/cli-render/templates/validating.tmpl', data);
+        return this.load(__dirname + '/../src/cli-render/templates/validating.tmpl', data);
     }
 }

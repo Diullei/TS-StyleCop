@@ -538,7 +538,7 @@ var OptionsParser = (function () {
 })();
 var Render = (function () {
     function Render() {
-        this.terminal = require('../src/cli-render/terminal-color.js');
+        this.terminal = require(__dirname + '/../src/cli-render/terminal-color.js');
         this.handlebars = require('handlebars');
         this.fs = require('fs');
         this.path = require('path');
@@ -562,7 +562,7 @@ var Render = (function () {
             }
         }
 
-        return this.load('../src/cli-render/templates/validating.tmpl', data);
+        return this.load(__dirname + '/../src/cli-render/templates/validating.tmpl', data);
     };
     return Render;
 })();
