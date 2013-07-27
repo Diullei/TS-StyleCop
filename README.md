@@ -82,6 +82,7 @@ The output will be:
 
 	 [!] Failed - 2 violations found.
 
+> NOTE: The `className1` validation was ignored
 
 ### Build
 
