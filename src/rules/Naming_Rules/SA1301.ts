@@ -21,14 +21,14 @@ export var rule = <RuleConfig>{
         nodeType: [TS.SyntaxKind.MemberFunctionDeclaration, TS.SyntaxKind.VariableDeclaration],
         propertyMatches: {
             propertyName: (node, refNode): bool => {
-                refNode.target = node;
+                refNode.targets.push(node);
                 return !(/[A-Z]/.test(node.text()[0]))
             },
             variableDeclarators: (node, refNode): bool => {
                 var arr = node.toArray();
                 if (arr.length > 0) {
                     var first = arr[0];
-                    refNode.target = first.identifier;
+                    refNode.targets.push(first.identifier);
                     return !(/[A-Z]/.test(first.identifier.text()[0]))
                 }
                 return true;

@@ -20548,6 +20548,7 @@ PositionTrackingWalker.registerRule = function (extension) {
 PositionTrackingWalker.prototype.applyRule = function (node, rule) {
     if (rule.matcher.nodeType.indexOf(node.kind()) == -1)
         return;
+
     if (typeof rule.matcher.propertyMatches !== 'undefined') {
         for (var prop in rule.matcher.propertyMatches) {
             if (!(prop in node)) {
@@ -20558,17 +20559,19 @@ PositionTrackingWalker.prototype.applyRule = function (node, rule) {
 
             var matcherProp = rule.matcher.propertyMatches[prop];
             if (typeof matcherProp === 'function') {
-                var refNode = {};
+                var refNode = { targets: [] };
 
                 if (!matcherProp(astProp, refNode)) {
                     if (!PositionTrackingWalker.violations)
                         PositionTrackingWalker.violations = [];
 
-                    PositionTrackingWalker.violations.push({
-                        code: rule.code,
-                        type: /*ViolationType.TSStyleCop*/1,
-                        message: rule.definition,
-                        node: refNode.target
+                    refNode.targets.forEach(function(node) {
+                        PositionTrackingWalker.violations.push({
+                            code: rule.code,
+                            type: /*ViolationType.TSStyleCop*/1,
+                            message: rule.definition,
+                            node: node
+                        });
                     });
                 }
             } else {
@@ -20592,7 +20595,11 @@ PositionTrackingWalker.prototype.ruleHandled = function (node) {
 
 // entry point
 PositionTrackingWalker.prototype.visitNode = function (node) {
-    //console.log(node)
+    if (process.env.DEBUG) {
+        console.log('---------------------------------------------------------')
+        console.log(TypeScript.SyntaxKind[node.kind()])
+        console.log(node)
+    }
     this.ruleHandled(node);
     node.accept(this);
 };
