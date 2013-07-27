@@ -1,0 +1,4 @@
+// SuppressMessage -> SA1300:ElementMustBeginWithUpperCaseLetter
+class className1 { }
+// test...
+class className2 { }

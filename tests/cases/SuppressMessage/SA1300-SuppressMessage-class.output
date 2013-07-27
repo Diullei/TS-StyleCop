@@ -1,0 +1,18 @@
+﻿
+-------------------------------------------------------------------------
+  >>> ../tests/cases/SuppressMessage/SA1300-SuppressMessage-class.ts
+-------------------------------------------------------------------------
+
+
+  #1 [SA1301] Element must begin with lower case letter
+         public Methid(){ // Line 3, Pos 12
+                ^^^^^^
+
+  #2 [SA1300] Element must begin with upper case letter
+     class className2 { } // Line 8, Pos 7
+           ^^^^^^^^^^
+
+
+ [!] Failed - 2 violations found.
+-------------------------------------------------------------------------
+

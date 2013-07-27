@@ -1,0 +1,18 @@
+﻿
+-------------------------------------------------------------------------
+  >>> ../tests/cases/Naming_Rules/SA1300-class.ts
+-------------------------------------------------------------------------
+
+
+  #1 [SA1300] Element must begin with upper case letter
+     class className1 { } // Line 1, Pos 7
+           ^^^^^^^^^^
+
+  #2 [SA1300] Element must begin with upper case letter
+     class className2 { } // Line 3, Pos 7
+           ^^^^^^^^^^
+
+
+ [!] Failed - 2 violations found.
+-------------------------------------------------------------------------
+

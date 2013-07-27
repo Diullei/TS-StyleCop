@@ -35,7 +35,7 @@ qunit.test('Running test cases...', function () {
 
     if (IO.fileExists(htmlFile)) IO.deleteFile(htmlFile);
 
-    var cases = IO.dir('../tests/cases/Naming_Rules', /\.ts$/g);
+    var cases = IO.dir('../tests/cases', /\.ts$/g, {recursive: true});
     var html = '';
 
     cases.forEach((file) => {

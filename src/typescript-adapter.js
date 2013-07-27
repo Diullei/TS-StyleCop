@@ -58,23 +58,42 @@ PositionTrackingWalker.prototype.applyRule = function (node, rule) {
     }
 };
 
-PositionTrackingWalker.prototype.ruleHandled = function (node) {
+PositionTrackingWalker.prototype.ruleHandled = function (node, suppressList) {
     var _this = this;
     var rule = PositionTrackingWalker.rulesByNodeType[node.kind()];
     if (typeof rule !== 'undefined') {
         rule.some(function (rl) {
-            _this.applyRule(node, rl)
+            if(!suppressList[rl.code + ':' + rl.name]){
+                _this.applyRule(node, rl)
+            }
         });
     }
 };
+
+function stractSuppressMessage(triviaList) {
+    var suppressList = {};
+    if(triviaList) {
+        triviaList.forEach(function(trivia){
+            if(TypeScript.SyntaxKind[trivia._kind] == "SingleLineCommentTrivia") {
+                var txt = trivia._textOrToken;
+                if (txt.match(/^\/\/\s*SuppressMessage\s*\->\s*SA1300\:ElementMustBeginWithUpperCaseLetter$/i)) {
+                    var message = txt.split('->')[1].trim(); 
+                    suppressList[message.trim()] = true;
+                }
+            }
+        });
+    }
+    return suppressList;
+}
 
 // entry point
 PositionTrackingWalker.prototype.visitNode = function (node) {
     if (process.env.DEBUG) {
         console.log('---------------------------------------------------------')
-        console.log(TypeScript.SyntaxKind[node.kind()])
+        console.log(node.leadingTrivia())
         console.log(node)
     }
-    this.ruleHandled(node);
+    var suppressList = stractSuppressMessage(node.leadingTrivia().trivia);
+    this.ruleHandled(node, suppressList);
     node.accept(this);
 };

@@ -1,0 +1,18 @@
+﻿
+-------------------------------------------------------------------------
+  >>> ../tests/cases/Naming_Rules/SA1300-Naming_Rules-enum-elements.ts
+-------------------------------------------------------------------------
+
+
+  #1 [SA1300] Element must begin with upper case letter
+     enum myEnum { // Line 2, Pos 6
+          ^^^^^^
+
+  #2 [SA1300] Element must begin with upper case letter
+     	b, // Line 4, Pos 1
+    	^
+
+
+ [!] Failed - 2 violations found.
+-------------------------------------------------------------------------
+

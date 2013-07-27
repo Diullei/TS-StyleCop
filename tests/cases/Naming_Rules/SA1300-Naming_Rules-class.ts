@@ -1,0 +1,3 @@
+class className1 { }
+// test...
+class className2 { }
