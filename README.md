@@ -48,7 +48,41 @@ class Class3 { }
 3. The command output will be:
 
 ![](https://raw.github.com/Diullei/TS-StyleCop/master/console.png?login=Diullei&token=b05bd0e74d256c64e80fb066bcc8faa4)
-	
+
+### Suppressing rules
+
+To suppress a rule you need to put a line comment with the following syntax:
+
+```javascript
+// SuppressMessage -> SA1300:ElementMustBeginWithUpperCaseLetter
+```
+
+With this the TS-StyleCop will ignore this rule validation to the first element after this comment. Example:
+
+```javascript
+// SuppressMessage -> SA1300:ElementMustBeginWithUpperCaseLetter
+class className1 { 
+    public Methid(){
+        //...
+    }
+}
+// test...
+class className2 { }
+```
+The output will be:
+
+	  #1 [SA1301] Element must begin with lower case letter
+	         public Methid(){ // Line 3, Pos 12
+	                ^^^^^^
+
+	  #2 [SA1300] Element must begin with upper case letter
+	     class className2 { } // Line 8, Pos 7
+	           ^^^^^^^^^^
+
+
+	 [!] Failed - 2 violations found.
+
+
 ### Build
 
 1. Install Node if you haven't already (http://nodejs.org/)
